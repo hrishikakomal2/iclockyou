@@ -329,8 +329,7 @@ input::placeholder,textarea::placeholder{color:var(--ink-2);opacity:.85}
   <div class="app" id="app"></div>
   <div class="app" id="app2" hidden></div>
 </div>
-<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<script>window.__REAL=true;</script>
+<script>window.__CFG={"url": "https://fcxnfmgxoxbtltpfgopl.supabase.co/functions/v1/api", "vapid": "BEL1V0PRh2Xh4uvPALsQmspDgAraE0dGTOJiFX6pOyUaNzT6D2r0yOffUVoq2jmH2MSTJekD_5RjVErf8h9l30I"};window.__REAL=true;</script>
 <script>
 'use strict';
 const REAL=!!window.__REAL;
@@ -460,7 +459,7 @@ function realSeed(){
 const load=()=>{try{const s=JSON.parse(localStorage.getItem('iclockyou-test-v1'));if(s&&s.v===3)return s}catch(e){}return null};
 let lastJson=null;
 let peer=null,dc=null,linkState='idle',linkErr='',retryT=null;
-const propagate=()=>{const j=JSON.stringify(S);if(j===lastJson)return;lastJson=j;sharedJson=j;try{localStorage.setItem('iclockyou-test-v1',j)}catch(e){}APPS.forEach(a=>{if(a!==api)a.sync(j)});if(REAL)linkPush(false)};
+const propagate=()=>{const j=JSON.stringify(S);if(j===lastJson)return;lastJson=j;sharedJson=j;try{localStorage.setItem('iclockyou-test-v1',j)}catch(e){}APPS.forEach(a=>{if(a!==api)a.sync(j)});if(REAL){linkPush(false);serverSyncSoon()}};
 const persist=propagate;
 const auto=()=>!(hooks&&hooks.isDual&&hooks.isDual())&&!(S.pair);
 S=sharedJson?JSON.parse(sharedJson):(load()||(REAL?realSeed():seed()));
@@ -727,6 +726,7 @@ SCR.today=()=>{
   return `<div class="head"><div><div class="eyebrow" style="display:flex;align-items:center;gap:6px"><span class="pdot"></span>My Space · ${WD[new Date(TODAY).getDay()]} ${new Date(TODAY).getDate()} ${MO[new Date(TODAY).getMonth()].slice(0,3)} · ${fmtM(S.clock)}</div><h1 class="title">${greeting()}, ${esc(u.name)}</h1></div>
     <div class="hbtns"><button class="ibtn" data-a="go" data-v="notifs" aria-label="Notifications${unread?', unread':''}">${ic('bell')}${unread?'<span class="dot"></span>':''}</button><button data-a="go" data-v="me" aria-label="Profile" style="border-radius:50%">${av(V(),44)}</button></div></div>
     ${chip}
+    ${REAL&&!S.pushOn&&pushSupported()?`<button class="strip" data-a="enablepush"><span class="ico">${ic('bell')}</span><span style="flex:1"><div class="s1">Turn on notifications</div><div class="s2">Get alarms, reminders and updates even when the app is closed</div></span><span class="chev">${ic('next',18)}</span></button>`:REAL&&!S.pushOn&&isIOS()&&!isStandalone()?`<div class="hint" style="margin-top:10px">For notifications on iPhone: tap Share, then Add to Home Screen, and open the app from there.</div>`:''}
     ${ap?promptCard(ap):''}
     ${asks.map(r=>askCard(r)).join('')}
     <div class="sec-h"><h2 class="sec">Today's schedule</h2><button class="link" data-a="go" data-v="routine">Routine</button></div>
@@ -758,7 +758,7 @@ SCR.us=()=>{
   if(S.mode==='mingle'&&st==='invited'){const pr=S.pair,host=pr&&pr.role==='host';
     return band+(pr?`<div class="card" style="display:grid;gap:12px;justify-items:center;text-align:center;padding:22px 16px;margin-top:6px">
       <div class="tagline">${host?'Your code':'Connecting with code'}</div><div class="codebig" aria-label="Code">${fmtCode(pr.code)}</div>
-      <p class="sub" style="margin:0;max-width:32ch">${host?`Ask your partner to open I Clock You, choose Mingle, and enter this code. Keep this app open until they join.`:`Your partner needs to have I Clock You open and be showing this code.`}</p>
+      <p class="sub" style="margin:0;max-width:32ch">${host?`Ask your partner to open I Clock You, choose Mingle, and enter this code. You'll be told when they join.`:`Checking with the server. Make sure the code is correct.`}</p>
       ${host?`<div class="btns" style="width:100%"><button class="btn sec" data-a="copycode">Copy code</button><button class="btn them" data-a="sharecode">Share</button></div>`:`<button class="btn sec sm" data-a="linkretry">Try again</button>`}
       <div class="chip" role="status">${linkLabel()}</div></div>`
       :`<div class="card" style="display:grid;gap:12px;justify-items:center;text-align:center;padding:22px 16px;margin-top:6px"><span class="av them ghost" style="--s:72px">${esc(nm(p)[0])}</span><div><h2 style="font:700 24px var(--f-display);margin:0">Waiting for ${esc(nm(p))} ❤️</h2></div></div>`)+
@@ -1012,15 +1012,19 @@ SCR.relmode=()=>{const p=nm(PID()),m=S.mode,st=S.pstate;
   <div style="display:grid;gap:10px">${card('single','Single','My Space only',`<svg width="56" height="56" viewBox="0 0 100 100" aria-hidden="true"><path d="M78 68A34 34 0 1 1 78 32" fill="none" stroke="var(--you)" stroke-width="8" stroke-linecap="round"/><path d="M48 50L48 28" stroke="var(--you)" stroke-width="9" stroke-linecap="round"/></svg>`)}${card('mingle','Mingle','My Space + Our Space',`<svg width="56" height="56" viewBox="0 0 100 100" aria-hidden="true"><circle cx="38" cy="50" r="24" fill="none" stroke="var(--you)" stroke-width="8"/><circle cx="62" cy="50" r="24" fill="none" stroke="var(--them)" stroke-width="8"/></svg>`)}</div>
   <div style="margin-top:14px">${panel}</div>
   ${S.archived?`<div class="sec-h"><h2 class="sec">Archived</h2></div><div class="list"><div class="pr"><span class="sl"><div class="s1">${esc(S.archived.name)}</div><div class="s2">Archived ${dayLabel(S.archived.at)} · recoverable for 90 days</div></span><button class="link" data-a="exportdata">Export</button></div></div>`:''}`};
-SCR.proto=()=>{const perm=('Notification' in window)?Notification.permission:'unsupported';
+SCR.proto=()=>{
+  const sup=pushSupported(),ios=isIOS(),sa=isStandalone();
+  const st=S.pushOn?'on':(!sup?(ios&&!sa?'ios':'unsupported'):(Notification.permission==='denied'?'denied':'off'));
+  const msg={on:'On. Alarms, reminders and partner updates reach you even when the app is closed.',ios:'On iPhone, first tap Share, then Add to Home Screen, and open the app from the new icon. Needs iOS 16.4 or newer.',unsupported:'This browser cannot receive notifications. Try Chrome on Android, or add the app to the Home Screen on iPhone.',denied:'Blocked. Allow notifications for this app in your phone settings, then come back.',off:'Turn them on to get alerts when the app is closed.'}[st];
   return `${bar('About this test build')}
-  <div class="hint you"><b>You're testing an early version.</b> Everything you add stays on this phone. Thank you for trying it and telling us what feels good and what doesn't.</div>
-  <div class="sec-h"><h2 class="sec">What works</h2></div>
-  <div class="list">${['My Space: routine, reminders, events, notes, alarms','Reminders and alarms alert you while the app is open','Mingle: connect two real phones with a code, or try a simulated partner','Privacy choices: Only me, Share with partner, Our Space'].map(t=>`<div class="pr">${ic('check',18)}<span class="sl"><div class="s1" style="font-weight:500">${t}</div></span></div>`).join('')}</div>
-  <div class="sec-h"><h2 class="sec">Not yet</h2></div>
-  <div class="list">${["Pairing needs both phones online at the same time and can fail on some networks","Alerts when the app is closed (not reliable in this build)","Backup if you clear the app's data"].map(t=>`<div class="pr">${ic('x',18)}<span class="sl"><div class="s1" style="font-weight:500">${t}</div></span></div>`).join('')}</div>
+  <div class="hint you"><b>You're testing an early version.</b> Thank you for trying it and telling us what feels good and what doesn't.</div>
   <div class="sec-h"><h2 class="sec">Notifications</h2></div>
-  <div class="list"><div class="set"><span class="sl"><div class="s1">Alerts outside the app</div><div class="s2">${perm==='granted'?'Allowed. They may still be delayed when the phone is idle.':perm==='denied'?'Blocked in your browser settings.':perm==='unsupported'?'Not supported on this phone.':'Ask your phone to allow them.'}</div></span>${perm==='default'?`<button class="btn sm" data-a="notifperm">Allow</button>`:''}</div></div>
+  <div class="list"><div class="set"><span class="sl"><div class="s1">Alerts when the app is closed</div><div class="s2">${msg}</div></span>${st==='off'?`<button class="btn sm" data-a="enablepush">Turn on</button>`:''}</div>
+  ${st==='on'?`<div class="set"><span class="sl"><div class="s1">Send a test notification</div></span><button class="btn sec sm" data-a="testpush">Test</button></div>`:''}</div>
+  <div class="sec-h"><h2 class="sec">What works</h2></div>
+  <div class="list">${['My Space: routine, reminders, events, notes, alarms','Mingle: pair two phones with a code, from anywhere','Shared items, status, check-ins and replies reach your partner, even if their phone is offline for a while','Notifications when the app is closed, once you turn them on','Privacy choices: Only me, Share with partner, Our Space'].map(t=>`<div class="pr">${ic('check',18)}<span class="sl"><div class="s1" style="font-weight:500">${t}</div></span></div>`).join('')}</div>
+  <div class="sec-h"><h2 class="sec">Not yet</h2></div>
+  <div class="list">${["An alarm that keeps ringing when the app is closed (you get a notification instead)","Backup if you clear the app's data","Private end-to-end encryption. Shared updates pass through a server, so avoid sensitive details"].map(t=>`<div class="pr">${ic('x',18)}<span class="sl"><div class="s1" style="font-weight:500">${t}</div></span></div>`).join('')}</div>
   <div class="sec-h"><h2 class="sec">Data</h2></div>
   <button class="btn bad" data-a="sheet" data-v="reset">Reset all data</button>`};
 
@@ -1076,6 +1080,7 @@ SCR.spaces=()=>{const mg=ui.onb.mode==='mingle',inv=S.pstate==='invited';
 SCR.invited=()=>SCR.connected();
 SCR.connected=()=>`<div class="flow" style="justify-content:center"><div class="phone2"><div style="display:flex;align-items:center"><span class="you">${av('lara',64)}</span><span class="them" style="margin-left:-12px">${av('sam',64)}</span></div><h1 style="text-align:center">${esc(PN())} joined</h1><p class="lead" style="max-width:34ch;text-align:center">${S.pair?'You are connected.':'Test build: '+esc(PN())+' is simulated on this phone.'} Three spaces now exist, and nobody sees anyone's private content.</p></div>
   <div style="display:grid;gap:10px"><div class="sp you"><span class="spi">${av('lara',36)}</span><span><b>${esc(MN())}'s My Space</b><small>Private to ${esc(MN())}</small></span></div><div class="sp them"><span class="spi">${av('sam',36)}</span><span><b>${esc(PN())}'s My Space</b><small>Private to ${esc(PN())}</small></span></div><div class="sp us"><span class="spi"><span class="avp">${av('lara',36)}${av('sam',36)}</span></span><span><b>${esc(MN())} &amp; ${esc(PN())}'s Our Space</b><small>Only what you both put here</small></span></div></div>
+  ${pushSupported()&&!S.pushOn?`<button class="btn sec" data-a="enablepush">Turn on notifications</button>`:''}
   <button class="btn" data-a="obgo" data-v="sharePresets">Choose what to share</button></div>`;
 SCR.sharePresets=()=>`<div class="flow"><div><h1>What would you like to share with ${esc(PN())}?</h1><p class="lead">You can change any of this, item by item, in Privacy.</p></div>
   <div style="display:grid;gap:10px">${[['essentials','Just the essentials','Wake up, sleep and working late. We ask each time.'],['everything','Everything','Share every check-in automatically.'],['nothing','Nothing yet','Keep it all to yourself. Our Space still works.']].map(([v,t,sub])=>`<button class="preset" data-a="obpreset" data-v="${v}" aria-pressed="${ui.onb.preset===v}"><span class="radio"></span><span><b>${t}</b><span>${sub}</span></span></button>`).join('')}</div>
@@ -1451,83 +1456,76 @@ function tick(){
   if(ui.ring!==r0||ui.banner!==b0)notifyOS();
 }
 if(REAL){setInterval(tick,15000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()})}
-/* ---------- partner link: real pairing over WebRTC (PeerJS) ---------- */
-const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:global.stun.twilio.com:3478'},{urls:['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turn:openrelay.metered.ca:443?transport=tcp'],username:'openrelayproject',credential:'openrelayproject'}]};
+/* ---------- partner link via server relay + push notifications ---------- */
+const CFG=window.__CFG||{};
 const CODE_ALPHA='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const genCode=()=>{let c='';const a=new Uint32Array(8);(window.crypto||{getRandomValues:x=>x.forEach((_,i)=>x[i]=Math.floor(Math.random()*4294967295))}).getRandomValues(a);for(const x of a)c+=CODE_ALPHA[x%32];return c};
 const fmtCode=c=>c?c.slice(0,4)+'-'+c.slice(4):'';
 const cleanCode=v=>String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
-const genToken=()=>{let t='';for(let i=0;i<20;i++)t+=CODE_ALPHA[Math.floor(Math.random()*32)];return t};
 const XO={lara:'S',sam:'R',us:'us'},XI={S:'sam',R:'lara',us:'us'};
-const linkOnline=()=>!!(dc&&dc.open&&S.pair&&S.pstate==='connected');
-const linkLabel=()=>({idle:'Not connected',waiting:'Waiting for your partner…',connecting:'Connecting…',online:'Connected',offline:"Your partner isn't online right now",retry:'Reconnecting…',error:"Couldn't connect"+(linkErr?' ('+linkErr+')':''),nolib:'Connecting needs an internet connection',rejected:'This code is already in use by someone else'}[linkState]||'');
-function sendMsg(m){if(dc&&dc.open){try{dc.send(m);return true}catch(e){}}return false}
-function linkStop(){clearTimeout(retryT);try{dc&&dc.close()}catch(e){}try{peer&&peer.destroy()}catch(e){}peer=null;dc=null;linkState='idle'}
-function scheduleRetry(ms){clearTimeout(retryT);retryT=setTimeout(()=>{if(S.pair)linkStart()},ms)}
-function linkStart(){
-  if(!REAL||!S.pair)return;
-  clearTimeout(retryT);
-  if(typeof Peer==='undefined'){linkState='nolib';render();scheduleRetry(10000);return}
-  try{dc&&dc.close()}catch(e){}try{peer&&peer.destroy()}catch(e){}peer=null;dc=null;
-  const host=S.pair.role==='host',id='iclock-'+S.pair.code;
+const tzName=()=>{try{return Intl.DateTimeFormat().resolvedOptions().timeZone||''}catch(e){return ''}};
+const sha256=async s=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};
+function linkOnline(){return !!(S.acct&&S.pair&&S.pstate==='connected')}
+const linkReady=linkOnline;
+const linkLabel=()=>({idle:'Not connected',waiting:'Waiting for your partner…',connecting:'Connecting…',online:'Connected',offline:"Can't reach the server. Changes will sync when you're back online.",error:"Couldn't connect"}[linkState]||'');
+async function srv(action,body){
+  if(!CFG.url||CFG.url.indexOf('__')===0)throw new Error('This build has no server set up');
+  const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),15000);
+  try{const r=await fetch(CFG.url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,...(body||{})}),signal:ctrl.signal});
+    let j={};try{j=await r.json()}catch(e){}
+    if(!r.ok||j.error)throw new Error(j.error||('Server error '+r.status));return j}
+  finally{clearTimeout(t)}
+}
+const authB=()=>({id:S.acct.id,secret:S.acct.secret});
+async function ensureAccount(){if(S.acct)return;const j=await srv('register',{name:MN(),tz:tzName()});S.acct={id:j.id,secret:j.secret};persist()}
+function linkStop(){linkState='idle'}
+function linkStart(){pollOnce()}
+/* outbox */
+let flushing=false,flushT=null;
+function newLink(){return {sent:{},feedSent:{},status:null,profile:null,out:[]}}
+function sendMsg(m){const L=S.link=S.link||newLink();(L.out=L.out||[]).push(m);flushSoon(0);return true}
+function flushSoon(ms){clearTimeout(flushT);flushT=setTimeout(flush,ms)}
+async function flush(){
+  if(flushing||!linkReady())return;const L=S.link;if(!L||!(L.out||[]).length)return;
+  flushing=true;const batch=L.out.slice(0,50);
+  try{await srv('send',{...authB(),msgs:batch});L.out=L.out.slice(batch.length);if(linkState!=='online'){linkState='online';render()}persist();if(L.out.length)flushSoon(50)}
+  catch(e){if(linkState!=='offline'){linkState='offline';render()}flushSoon(8000)}
+  finally{flushing=false}
+}
+/* polling */
+let polling=false;const ackIds=[];
+async function pollOnce(){
+  if(polling||!S.acct||!S.pair)return;polling=true;
   try{
-    peer=host?new Peer(id,{config:ICE}):new Peer(undefined,{config:ICE});
-    linkState=host?'waiting':'connecting';
-    peer.on('open',()=>{if(host){linkState=linkOnline()?'online':(S.pstate==='connected'?'offline':'waiting')}else connectToHost();render()});
-    peer.on('connection',c=>attach(c));
-    peer.on('disconnected',()=>{try{peer.reconnect()}catch(e){}});
-    peer.on('error',err=>{
-      const t=err&&err.type;
-      if(t==='unavailable-id'){linkState='retry';scheduleRetry(7000)}
-      else if(t==='peer-unavailable'){linkState=S.pstate==='connected'?'offline':'offline';scheduleRetry(8000)}
-      else{linkErr=t||'';linkState='error';scheduleRetry(9000)}
-      render();
-    });
-  }catch(e){linkState='error';linkErr='start';render();scheduleRetry(10000)}
-}
-function connectToHost(){
-  if(!peer||!S.pair)return;
-  const c=peer.connect('iclock-'+S.pair.code,{reliable:true,serialization:'json'});
-  attach(c);
-}
-function attach(c){
-  c.on('open',()=>onOpen(c));
-  if(c.open)onOpen(c);
-  c.on('data',m=>onMsg(m,c));
-  c.on('close',()=>{if(dc===c){dc=null;linkState=S.pair?'offline':'idle';render();if(S.pair&&S.pair.role==='guest')scheduleRetry(5000)}});
-  c.on('error',()=>{});
-}
-function onOpen(c){
-  if(S.pair&&S.pair.role==='guest'){c.send({t:'hello',dev:DEVID,name:MN(),token:S.pair.token||null})}
+    if(S.pstate==='invited'&&S.pair.role==='host'){
+      const j=await srv('partner',authB());
+      if(j.paired){polling=false;S.users.sam.name=(j.name||'').trim()||'Partner';S.mode='mingle';S.pstate='connected';afterHello(true);return}
+      if(linkState!=='waiting'){linkState='waiting';render()}return}
+    if(S.pstate!=='connected')return;
+    const j=await srv('poll',{...authB(),ack:ackIds.splice(0)});
+    if(linkState!=='online'){linkState='online';render()}
+    const ms=j.msgs||[];
+    for(const m of ms){try{onMsg(m.payload)}catch(e){}ackIds.push(m.id)}
+    if(ms.length)flushSoon(0);
+    if((S.link&&S.link.out||[]).length)flushSoon(0);
+  }catch(e){if(linkState!=='offline'){linkState='offline';render()}}
+  finally{polling=false}
 }
 function afterHello(first){
-  linkState='online';S.link=S.link||{sent:{},feedSent:{},status:null,profile:null};
+  linkState='online';S.link=S.link||newLink();
   sendProfile(true);linkPush(true);
-  if(first){ui.sheet=null;ui.banner=null;route=[{n:'connected'}];commit();toast(PN()+' connected')}else{commit()}
+  if(first){ui.sheet=null;ui.banner=null;route=[{n:'connected'}];commit();toast(PN()+' connected')}else commit();
+  serverSyncSoon();
 }
-function onMsg(m,c){
+function onMsg(m){
   if(!m||!m.t)return;
   switch(m.t){
-    case 'hello':{
-      if(!S.pair||S.pair.role!=='host'){c.send({t:'reject'});c.close();return}
-      if(S.pair.token){if(m.token!==S.pair.token){c.send({t:'reject'});c.close();return}}
-      else S.pair.token=genToken();
-      if(dc&&dc!==c&&dc.open){try{dc.close()}catch(e){}}
-      dc=c;const first=S.pstate!=='connected';
-      S.users.sam.name=(m.name||'').trim()||'Partner';S.mode='mingle';S.pstate='connected';
-      c.send({t:'welcome',token:S.pair.token,name:MN()});
-      afterHello(first);break}
-    case 'welcome':{
-      if(!S.pair)return;dc=c;S.pair.token=m.token;const first=S.pstate!=='connected';
-      S.users.sam.name=(m.name||'').trim()||'Partner';S.mode='mingle';S.pstate='connected';
-      afterHello(first);break}
-    case 'reject':{linkState='rejected';if(S.pair&&!S.pair.token){S.pair=null;S.pstate='none'}try{c.close()}catch(e){}render();break}
     case 'profile':{const p=m.p||{};Object.assign(S.users.sam,{name:p.name||S.users.sam.name,routine:p.routine||{},extra:p.extra||[],workStart:p.workStart||'09:00',workEnd:p.workEnd||'18:00',workLoc:p.workLoc||'Office',days:p.days||[1,2,3,4,5],sharing:Object.assign({work:'details',meetings:'details',routineTimes:'always',status:'always'},p.sharing||{})});commit();break}
     case 'status':{S.status.sam=m.s||null;commit();break}
     case 'doc':{adoptDoc(m.k,m.d);commit();break}
     case 'del':{if(S[m.k]){S[m.k]=S[m.k].filter(x=>x.id!==m.id)}if(S.link)delete S.link.sent[m.k+':'+m.id];commit();break}
     case 'feed':{onFeed(m.f);break}
-    case 'bye':{linkStop();S.pair=null;S.mode='single';S.pstate='readonly';S.status.sam=null;route=[{n:'today'}];commit();toast(PN()+' left Our Space. It is read-only now.');break}
+    case 'bye':{S.pair=null;S.mode='single';S.pstate='readonly';S.status.sam=null;route=[{n:'today'}];commit();toast(PN()+' left Our Space. It is read-only now.');break}
   }
 }
 const nowT=()=>Date.now();
@@ -1551,27 +1549,31 @@ function profileWire(){
   return {name:u.name,routine:u.sharing.routineTimes==='never'?{}:Object.assign({},u.routine),extra:u.sharing.routineTimes==='never'?[]:(u.extra||[]).map(x=>({...x})),workStart:u.workStart,workEnd:u.workEnd,workLoc:u.workLoc,days:u.days,sharing:{...u.sharing}};
 }
 function sendProfile(force){
-  const L=S.link=S.link||{sent:{},feedSent:{},status:null,profile:null};
+  const L=S.link=S.link||newLink();
   const p=profileWire(),h=canon(p);
   if(force||L.profile!==h){if(sendMsg({t:'profile',p}))L.profile=h}
 }
 function linkPush(all){
-  if(!REAL||!S.pair||S.pstate!=='connected'||!linkOnline())return;
-  const L=S.link=S.link||{sent:{},feedSent:{},status:null,profile:null};let mutated=false;
+  if(!REAL||!S.pair||S.pstate!=='connected'||!linkReady())return;
+  const L=S.link=S.link||newLink();let mutated=false;
   const cur={};
   for(const r of S.rems)if(sharedRem(r))cur['rems:'+r.id]=['rems',r,wireDoc('rems',r)];
   for(const e of S.events)if(sharedEv(e))cur['events:'+e.id]=['events',e,wireDoc('events',e)];
   for(const n of S.notes)if(sharedNote(n))cur['notes:'+n.id]=['notes',n,wireDoc('notes',n)];
   for(const key in cur){const [k,local,d]=cur[key],h=canon(d);
-    if(all||L.sent[key]!==h){const rev=nowT();local._rev=rev;if(sendMsg({t:'doc',k,d:{...d,_rev:rev}})){L.sent[key]=h;mutated=true}}}
-  for(const key of Object.keys(L.sent)){if(!(key in cur)){const [k,id]=key.split(':');if(sendMsg({t:'del',k,id})){delete L.sent[key];mutated=true}}}
-  for(const f of S.feed){if(f.from==='lara'&&f.to==='sam'&&!L.feedSent[f.id]){const w={id:f.id,kind:f.kind,ck:f.ck,rk:f.rk,text:f.text,ts:f.ts,replies:f.replies};if(sendMsg({t:'feed',f:w})){L.feedSent[f.id]=1;mutated=true}}}
-  const st=canon(S.status.lara||null);if(all||L.status!==st){if(sendMsg({t:'status',s:S.status.lara||null})){L.status=st;mutated=true}}
+    if(all||L.sent[key]!==h){
+      const isNew=L.sent[key]===undefined;
+      const rev=nowT();local._rev=rev;sendMsg({t:'doc',k,d:{...d,_rev:rev}});
+      if(isNew&&k==='rems'&&local.by==='lara'&&local.for==='sam'&&!local.joint&&local.status==='sent')sendMsg({t:'notify',title:MN()+' reminded you',body:local.title});
+      L.sent[key]=h;mutated=true}}
+  for(const key of Object.keys(L.sent)){if(!(key in cur)){const [k,id]=key.split(':');sendMsg({t:'del',k,id});delete L.sent[key];mutated=true}}
+  for(const f of S.feed){if(f.from==='lara'&&f.to==='sam'&&!L.feedSent[f.id]){sendMsg({t:'feed',f:{id:f.id,kind:f.kind,ck:f.ck,rk:f.rk,text:f.text,ts:f.ts,replies:f.replies}});L.feedSent[f.id]=1;mutated=true}}
+  const st=canon(S.status.lara||null);if(all||L.status!==st){sendMsg({t:'status',s:S.status.lara||null});L.status=st;mutated=true}
   sendProfile(false);
   if(mutated){const j=JSON.stringify(S);if(j!==lastJson){lastJson=j;sharedJson=j;try{localStorage.setItem('iclockyou-test-v1',j)}catch(e){}}}
 }
 function adoptDoc(k,d){
-  const arr=S[k];if(!arr)return;const doc=unwireDoc(k,d),L=S.link=S.link||{sent:{},feedSent:{},status:null,profile:null};
+  const arr=S[k];if(!arr)return;const doc=unwireDoc(k,d),L=S.link=S.link||newLink();
   const i=arr.findIndex(x=>x.id===doc.id);
   const rev=doc._rev||0;delete doc._rev;
   const hash=canon(wireDoc(k,doc));
@@ -1581,7 +1583,7 @@ function adoptDoc(k,d){
     if(k==='rems')nd.log=[{t:NOW(),text:`${nm(doc.by)} ${doc.by===doc.for?'added this':'sent this to '+(doc.for==='lara'?'you':nm(doc.for))}`}];
     arr.push(nd);L.sent[k+':'+doc.id]=hash;
     if(k==='rems'&&doc.for==='lara'&&doc.by==='sam'&&!doc.joint&&doc.status==='sent'){
-      const id=uid('f');S.feed.unshift({id,to:'lara',from:'sam',kind:'reminder',text:`${nm('sam')} reminded you: ${doc.title}`,ts:NOW(),read:false,push:true,ref:doc.id});ui.banner={t:'feed',id};notifyOS()}
+      const id=uid('f');S.feed.unshift({id,to:'lara',from:'sam',kind:'reminder',text:`${nm('sam')} reminded you: ${doc.title}`,ts:NOW(),read:false,push:true,ref:doc.id});ui.banner={t:'feed',id}}
     return;
   }
   const loc=arr[i];if(rev<=(loc._rev||0))return;
@@ -1595,29 +1597,93 @@ function onFeed(f){
   if(f.kind==='reply'||f.kind==='reminder')push=true;
   else{const pref=u.recv[f.rk||'task']||'quiet';if(pref==='off'){return}push=pref==='notify'&&!(u.dnd||u.quietDay||inQuiet('lara'))&&(S.pushes.lara||0)<6;if(push)S.pushes.lara=(S.pushes.lara||0)+1}
   S.feed.unshift({...f,to:'lara',from:'sam',read:false,push});
-  if(push){ui.banner={t:'feed',id:f.id};notifyOS()}
+  if(push){ui.banner={t:'feed',id:f.id}}
   commit();
 }
+/* ---------- web push + scheduled notifications ---------- */
+function pushSupported(){return ('serviceWorker' in navigator)&&('PushManager' in window)&&('Notification' in window)}
+function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)}
+function isStandalone(){try{return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true}catch(e){return false}}
+function urlB64(b){const p='='.repeat((4-b.length%4)%4);const s=(b+p).replace(/-/g,'+').replace(/_/g,'/');const r=atob(s);return Uint8Array.from([...r].map(c=>c.charCodeAt(0)))}
+function prefsWire(){const u=S.users.lara;return {recv:u.recv,dnd:u.dnd,quietDay:u.quietDay,quiet:u.quiet}}
+async function enablePush(){
+  if(!pushSupported()){toast(isIOS()&&!isStandalone()?'On iPhone, add this app to your Home Screen first, then open it from there.':'This browser cannot receive notifications.');return}
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=='granted'){toast('Notifications are blocked. Allow them in your phone settings.');return}
+    await ensureAccount();
+    const reg=await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlB64(CFG.vapid)});
+    await srv('update',{...authB(),sub:sub.toJSON(),prefs:prefsWire(),tz:tzName(),name:MN()});
+    S.pushOn=true;lastPrefs='';lastSched='';commit();serverSync();toast('Notifications are on');
+  }catch(e){toast("Couldn't turn on notifications: "+(e&&e.message||'error'))}
+}
+function buildSchedule(){
+  const items=[],abs=Date.now();
+  const add=(id,ts,title,body,tag)=>{if(ts>abs+30000&&ts<abs+72*36e5)items.push({id,fire_at:new Date(ts).toISOString(),title,body,tag})};
+  for(let i=0;i<3;i++){const day=TODAY+i*DAY,dkey=dk(day),dow=new Date(day).getDay();
+    for(const a of S.alarms){if(a.user&&a.user!==V()||!a.on)continue;if(a.days.length&&!a.days.includes(dow))continue;if(!a.days.length&&i>0)continue;add('al:'+a.id+dkey,day+hm2m(a.time)*6e4,a.label||'Alarm','Your alarm','alarm')}
+    for(const o of remOcc(day)){const r=o.r;if((r.for===V()||r.joint)&&!r.done[o.k])add('rm:'+r.id+o.k,o.ts,r.title,(r.by!==r.for&&r.for===V())?nm(r.by)+' asked you':'Reminder','rem')}
+    for(const e of evOcc(day)){if(e.e.owner===V()||e.e.owner==='us'){const lead=e.e.lead||0;add('ev:'+e.e.id+dkey,e.ts-lead*6e4,e.e.title,lead?`In ${lead} minutes`:'Starting now','ev')}}
+    if(S.mode==='mingle'){for(const e of routineList(V())){const c=ckOf(V(),e.kind);if(i===0&&isFinal(c))continue;const def=CI[e.kind];add('ci:'+e.kind+dkey,day+hm2m(e.time)*6e4,plain(def.title(U().name)),def.body,'checkin')}}
+  }
+  return items;
+}
+let syncT=null,lastPrefs='',lastSched='';
+function serverSyncSoon(){clearTimeout(syncT);syncT=setTimeout(serverSync,1500)}
+async function serverSync(){
+  if(!S.acct||!S.pushOn)return;
+  try{
+    const pw=canon(prefsWire())+tzName()+MN();
+    if(pw!==lastPrefs){await srv('update',{...authB(),prefs:prefsWire(),tz:tzName(),name:MN()});lastPrefs=pw}
+    const items=buildSchedule(),h=canon(items);
+    if(h!==lastSched){await srv('schedule',{...authB(),items});lastSched=h}
+  }catch(e){}
+}
 Object.assign(A,{
-  linkhost:()=>{const wasOn=S.onboarded;if(!wasOn){applyOnb();ui.onb.mode='mingle'}S.mode='mingle';S.pstate='invited';S.pair={code:genCode(),role:'host',token:null};S.pinfo={method:'code',contact:''};ui.sheet=null;route=[{n:wasOn?'us':'spaces'}];commit();linkStart()},
-  linkjoin:()=>{const raw=(ui.sheet&&ui.sheet.t==='invite')?ui.sheet.codeIn:ui.onb.codeIn;const code=cleanCode(raw);
-    if(code.length!==8){ui.onb.codeErr=ui.codeErr='That code should be 8 letters and numbers.';const e=$('#codeerr');if(e)e.textContent=ui.codeErr;return}
-    ui.onb.codeErr=ui.codeErr='';const wasOn=S.onboarded;if(!wasOn){applyOnb();ui.onb.mode='mingle'}
-    S.mode='mingle';S.pstate='invited';S.pair={code,role:'guest',token:null};S.pinfo={method:'code',contact:''};ui.sheet=null;route=[{n:wasOn?'us':'spaces'}];commit();linkStart()},
-  linkretry:()=>{linkStart()},
+  linkhost:async()=>{
+    const wasOn=S.onboarded;if(!wasOn){applyOnb();ui.onb.mode='mingle'}
+    toast('Creating your code…');
+    try{
+      await ensureAccount();await srv('update',{...authB(),name:MN(),tz:tzName()});
+      let code='';for(let i=0;i<4;i++){code=genCode();try{await srv('pair_create',{...authB(),code_hash:await sha256(code)});break}catch(e){if(i===3)throw e}}
+      S.mode='mingle';S.pstate='invited';S.pair={code,role:'host'};S.pinfo={method:'code',contact:''};ui.sheet=null;linkState='waiting';
+      route=[{n:wasOn?'us':'spaces'}];commit();pollOnce();
+    }catch(e){toast("Couldn't reach the server. Check your internet and try again.")}
+  },
+  linkjoin:async()=>{
+    const raw=(ui.sheet&&ui.sheet.t==='invite')?ui.sheet.codeIn:ui.onb.codeIn;const code=cleanCode(raw);
+    const say=t=>{ui.onb.codeErr=ui.codeErr=t;const e=$('#codeerr');if(e)e.textContent=t};
+    if(code.length!==8){say('That code should be 8 letters and numbers.');return}
+    say('Connecting…');
+    try{
+      await ensureAccount();await srv('update',{...authB(),name:MN(),tz:tzName()});
+      const j=await srv('pair_join',{...authB(),code_hash:await sha256(code)});
+      say('');const wasOn=S.onboarded;if(!wasOn){applyOnb();ui.onb.mode='mingle'}
+      S.mode='mingle';S.pstate='connected';S.pair={code,role:'guest'};S.pinfo={method:'code',contact:''};S.users.sam.name=(j.name||'').trim()||'Partner';ui.sheet=null;
+      afterHello(true);
+    }catch(e){say((e&&e.message)||"Couldn't connect. Check your internet.")}
+  },
+  linkretry:()=>{pollOnce();toast('Checking…')},
   copycode:()=>{const t=fmtCode(S.pair&&S.pair.code);try{navigator.clipboard.writeText(t).then(()=>toast('Code copied'),()=>toast('Code: '+t))}catch(e){toast('Code: '+t)}},
   sharecode:()=>{const c=fmtCode(S.pair&&S.pair.code),text=`Join me on I Clock You. Open the app, choose Mingle, and enter this code: ${c}`;try{if(navigator.share){navigator.share({title:'I Clock You',text,url:location.href.split('#')[0]}).catch(()=>{})}else{navigator.clipboard.writeText(text);toast('Invite text copied')}}catch(e){toast('Code: '+c)}},
-  simpartner:()=>{linkStop();S.pair=null;S.users.sam.name=S.users.sam.name==='Partner'?'Alex':S.users.sam.name;A.obgo({dataset:{v:'connected'}})},
-  cancelinv:()=>{linkStop();S.pair=null;S.pstate='none';commit();toast('Code cancelled')},
+  simpartner:()=>{S.pair=null;S.users.sam.name=S.users.sam.name==='Partner'?'Alex':S.users.sam.name;A.obgo({dataset:{v:'connected'}})},
+  cancelinv:()=>{if(S.acct&&S.pair)srv('leave',authB()).catch(()=>{});S.pair=null;S.pstate='none';commit();toast('Code cancelled')},
+  enablepush:()=>{enablePush()},
+  testpush:async()=>{try{await ensureAccount();const j=await srv('test',authB());toast(j.hasSub?(j.ok?'Test sent. It should appear in a few seconds.':'The phone did not accept it. Turn notifications off and on again.'):'Turn on notifications first')}catch(e){toast("Couldn't reach the server")}},
 });
-const _sepgo=A.sepgo;A.sepgo=()=>{if(S.pair){sendMsg({t:'bye'});linkStop();S.pair=null}_sepgo()};
+const _sepgo=A.sepgo;A.sepgo=()=>{if(S.pair&&S.acct){srv('leave',authB()).catch(()=>{});S.pair=null}_sepgo()};
 Object.assign(INP,{codein:e=>{const v=e.value.toUpperCase();if(ui.sheet&&ui.sheet.t==='invite')ui.sheet.codeIn=v;else ui.onb.codeIn=v}});
 if(REAL){
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.pair&&!linkOnline()&&linkState!=='connecting')linkStart()});
-  window.addEventListener('online',()=>{if(S.pair&&!linkOnline())linkStart()});
-  setTimeout(()=>{if(S.pair&&!peer)linkStart()},600);
+  setInterval(()=>{if(!document.hidden&&S.pair)pollOnce()},4000);
+  setInterval(()=>{if(!document.hidden)flush()},15000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){pollOnce();flush();serverSyncSoon()}});
+  window.addEventListener('online',()=>{pollOnce();flush()});
+  try{navigator.serviceWorker&&navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.t==='poll')pollOnce()})}catch(e){}
+  setTimeout(()=>{if(S.pair)pollOnce();serverSyncSoon()},600);
 }
-const api={sync,linkAttachTest:(c)=>attach(c),render,setViewer,getViewer:()=>viewer,ui,route:()=>route,S:()=>S};
+const api={sync,render,setViewer,getViewer:()=>viewer,ui,route:()=>route,S:()=>S};
 APPS.push(api);
 if(hooks.primary)window.__iclock={setClock,resetDay,answer:(u,k,o)=>{answer(u,k,o);commit()},state:()=>S,ui};
 render();
