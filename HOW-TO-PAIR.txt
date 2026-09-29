@@ -1,0 +1,25 @@
+Pairing two phones with a code (Mingle)
+======================================
+Person 1 (host)
+  1. Open I Clock You. During setup choose Mingle (or Me > Relationship mode > Switch to Mingle).
+  2. Tap "Create a code". A code like K7Q4-XM9P appears on the Our Space tab.
+  3. Tap Share or Copy and send it to your partner.
+  4. KEEP THE APP OPEN on that screen until your partner joins.
+
+Person 2 (guest)
+  1. Open I Clock You on their own phone. Choose Mingle.
+  2. Tap "I have a code from my partner", type the code, tap Connect.
+  3. Both phones show "connected" and then let each person choose what to share.
+
+After that
+  - Shared items (Our Space, Share with partner), status, check-in updates and replies sync live while both phones are online.
+  - My Space stays private on each phone.
+  - If one phone is offline, changes wait and sync when both are online again.
+  - Reopen the app to reconnect. The first phone that opens waits; the other connects.
+
+Good to know
+  - Connection uses a free public relay (PeerJS) for the handshake and then talks phone to phone.
+    It can fail on some mobile networks or company Wi-Fi. If it does not connect, try both phones on the same Wi-Fi.
+  - The code is one-time: once two phones are paired, other phones are rejected.
+  - Leaving (Me > Relationship mode > Separate) makes Our Space read-only for both.
+  - Alerts when the app is closed are not reliable in this build.
