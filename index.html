@@ -143,8 +143,8 @@ h2.sec{font:650 12px/1 var(--f-body);letter-spacing:.07em;text-transform:upperca
 .dc li{display:flex;gap:8px;align-items:baseline;justify-content:space-between}
 .dc li span:first-child{color:var(--ink-2)}.dc li b{font-variant-numeric:tabular-nums;font-weight:650;font-size:13.5px;white-space:nowrap}
 .dc .none{font-size:13px;color:var(--ink-2)}
-.qm{display:flex;gap:8px;overflow-x:auto;margin:0 -20px;padding:2px 20px;scrollbar-width:none}
-.qm::-webkit-scrollbar{display:none}
+.qm{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;margin:0 -20px;padding:2px 20px 6px;scrollbar-width:thin;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;scroll-snap-type:x proximity;cursor:grab}.qm.drag{cursor:grabbing;scroll-snap-type:none;user-select:none}.qm button{scroll-snap-align:start}
+.qm::-webkit-scrollbar{height:4px}.qm::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
 .qm button{flex:none;padding:10px 14px;border-radius:99px;background:var(--surface);border:1px solid var(--line);font-weight:600;font-size:14px;min-height:44px}
 .qm button:active{background:var(--them-soft)}
 .uprow{display:flex;gap:12px;align-items:center;padding:11px 0}
@@ -380,7 +380,7 @@ const CI={
 const STATUSES=[['awake','☀️','Awake'],['working','💼','Working'],['eating','🍴','Eating'],['home','🏠','Home'],['traveling','🚗','Traveling'],['sleeping','😴','Sleeping'],['busy','🔕','Busy'],['available','🙂','Available']];
 const RECV=[['wake','Wakes up'],['sleep','Goes to sleep'],['late','Working late'],['task','Finishes a reminder you sent'],['event','Shared event coming up'],['work','Starts work'],['workend','Finishes work'],['breakfast','Breakfast'],['lunch','Lunch'],['dinner','Dinner']];
 const plain=t=>t.replace(/[\p{Extended_Pictographic}️]/gu,'').replace(/\s+/g,' ').trim();
-const QUICK=['Thinking of you','Call me when you can','Running late','On my way','Miss you'];
+const QUICK=["Thinking of you","Call me when you can","Running late","On my way","Miss you","Love you ❤️","Good morning ☀️","Good night 🌙","Reached home 🏠","Reached office 💼","Have you eaten?","Did you eat lunch?","Take care","Drink some water 💧","Stay safe","Let’s talk tonight","Can we talk?","Call me?","I’m free now","I’m busy, will call later","In a meeting","Be right back","Sorry, I’m late","Proud of you","You got this 💪","Thank you","Great job!","What’s for dinner?","Shall I pick up something?","Coming to get you","Movie tonight?","Dinner tonight?","Coffee later?","Save me a seat","Wait for me","Don’t forget the milk","Sweet dreams","Hug 🤗","Kiss 😘","Can’t wait to see you"];
 
 /* ---------- seed ---------- */
 function seed(){
@@ -1902,6 +1902,14 @@ Object.assign(A,{
   pqsend:()=>{const t=(ui.sheet.text||'').trim();ui.sheet=null;if(!t){render();return}sendQuick(t)},
 });
 {const _sg=A.sepgo;A.sepgo=()=>{pClearPartner();_sg()}}
+
+/* horizontal scroll for chip rows: mouse wheel and drag */
+root.addEventListener('wheel',e=>{const q=e.target.closest&&e.target.closest('.qm');if(q&&Math.abs(e.deltaY)>Math.abs(e.deltaX)&&q.scrollWidth>q.clientWidth){q.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
+{let dq=null,sx=0,sl=0,moved=false;
+root.addEventListener('mousedown',e=>{const q=e.target.closest&&e.target.closest('.qm');if(q){dq=q;sx=e.clientX;sl=q.scrollLeft;moved=false}});
+window.addEventListener('mousemove',e=>{if(!dq)return;const dx=e.clientX-sx;if(Math.abs(dx)>4){moved=true;dq.classList.add('drag')}if(moved)dq.scrollLeft=sl-dx});
+window.addEventListener('mouseup',()=>{if(dq){const q=dq;dq=null;setTimeout(()=>q.classList.remove('drag'),0)}});
+root.addEventListener('click',e=>{if(moved&&e.target.closest&&e.target.closest('.qm')){e.stopPropagation();e.preventDefault();moved=false}},true);}
 
 const api={sync,render,setViewer,getViewer:()=>viewer,ui,route:()=>route,S:()=>S};
 APPS.push(api);
