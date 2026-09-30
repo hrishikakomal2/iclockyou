@@ -1037,7 +1037,7 @@ SCR.proto=()=>{
   <button class="btn bad" data-a="sheet" data-v="reset">Reset all data</button>`};
 
 /* ---------- onboarding flow screens ---------- */
-const obOrder=()=>['signup','mode',...(ui.onb.mode==='mingle'?['invite']:[]),'spaces'];
+const obOrder=()=>['signup','mode','details',...(ui.onb.mode==='mingle'?['invite']:[]),'spaces'];
 const stepList=()=>obOrder().slice(2,-1);
 const flowTop=(steps)=>{const cur=route[0].n,sl=stepList(),i=sl.indexOf(cur);return `<div style="display:flex;align-items:center;gap:8px;margin-left:-10px"><button class="ibtn" data-a="obback" aria-label="Back">${ic('back')}</button>${steps&&i>=0?`<div style="flex:1"><div class="steps" aria-label="Step ${i+1} of ${sl.length}">${sl.map((_,j)=>`<i class="${j<=i?'on':''}"></i>`).join('')}</div></div><button class="link" data-a="obskip">Skip</button>`:''}</div>`};
 const artSingle=`<svg width="92" height="92" viewBox="0 0 100 100" aria-hidden="true"><path d="M78 68A34 34 0 1 1 78 32" fill="none" stroke="var(--you)" stroke-width="7" stroke-linecap="round"/><path d="M48 50L48 27" stroke="var(--you)" stroke-width="8" stroke-linecap="round"/><circle cx="48" cy="50" r="5" fill="var(--you)"/></svg>`;
@@ -1046,9 +1046,9 @@ SCR.splash=()=>{if(!ui.splashTimer){ui.splashTimer=setTimeout(()=>{if(route[rout
   return `<div class="splash" style="animation:fade .4s"><div style="color:#F2F5F6">${MARK(84)}</div><b>I Clock You</b><div class="tagline" style="color:#9FB2B9">Time, routine, together</div></div>`};
 SCR.welcome=()=>`<div class="flow"><div class="hero"><div>${MARK(52)}</div><h1>One clock for your day. Two, if you want.</h1><p class="lead">Notes, reminders, alarms and your schedule in My Space. Add a partner and you get Our Space too.</p></div>
   <div style="display:grid;gap:8px"><button class="btn" data-a="obgo" data-v="signup">Get started</button><p style="font-size:12.5px;color:var(--ink-2);text-align:center;margin:4px 0 0">Test build. Your data stays on this phone.</p></div></div>`;
-SCR.signup=()=>`<div class="flow">${flowTop()}<div><h1>Let's set you up</h1><p class="lead">Just your name. You can add your work days and daily times later, in one minute, when you're ready.</p></div>
+SCR.signup=()=>`<div class="flow">${flowTop()}<div><h1>Choose a username</h1><p class="lead">This is the name your partner sees. No password or email needed. Your data stays on this phone.</p></div>
   <div style="display:grid;gap:12px">
-  <label class="field"><span>Your name</span><input type="text" data-in="obname" value="${esc(ui.onb.name)}" placeholder="Your name" autocomplete="given-name"></label>
+  <label class="field"><span>Username</span><input type="text" data-in="obname" value="${esc(ui.onb.name)}" placeholder="e.g. lara_j" maxlength="30" autocomplete="username" autocapitalize="none"></label>
   <button class="btn" data-a="obnext">Continue</button></div></div>`;
 SCR.login=()=>SCR.signup();
 const MN=()=>S.users.lara.name||'You',PN=()=>S.users.sam.name||'Partner';
@@ -1084,6 +1084,15 @@ SCR.spaces=()=>{const mg=ui.onb.mode==='mingle',inv=S.pstate==='invited';
   <div class="sp you"><span class="spi"><span class="avp">${av('lara',40)}</span></span><span><b>My Space</b><small>Mine. Notes, reminders, alarms, schedule, routine. Private by default.</small></span></div>
   ${mg?`<div class="sp them"><span class="spi">${inv?`<span class="av them ghost" style="--s:40px">${esc(PN()[0]||'P')}</span>`:`<span class="avp">${av('lara',40)}${av('sam',40)}</span>`}</span><span><b>Our Space</b><small>${inv?(S.pair&&S.pair.role==='host'?'Share your code. It starts when your partner joins.':S.pair?'Connecting with your partner.':'Waiting for '+esc(PN())+'.'):'Ours. Shared tasks, schedule and status, only what you both choose.'}</small></span></div>`:''}</div>
   <button class="btn" data-a="obfinish">Open My Space</button></div>`};
+
+SCR.details=()=>{const u=S.users.lara,o=ui.onb;
+  return `<div class="flow">${flowTop(1)}<div><h1>Your details</h1><p class="lead">So check-ins arrive at the right time. You can change all of this later.</p></div>
+  <div class="field"><span>Work days</span><div class="dchips">${[1,2,3,4,5,6,0].map(d=>`<button data-a="obday" data-v="${d}" aria-pressed="${o.days.includes(d)}" aria-label="${WDL[d]}">${WD[d][0]}</button>`).join('')}</div></div>
+  <div class="card"><div class="tline"><label>Work starts</label><input type="time" value="${u.workStart}" data-in="obws"></div><div class="tline"><label>Work ends</label><input type="time" value="${u.workEnd}" data-in="obwe"></div></div>
+  <div class="field"><span>Where do you work?</span><div class="chipsel">${['Office','Work from home','Hybrid'].map(a=>`<button data-a="obloc" data-v="${a}" aria-pressed="${o.loc===a}">${a}</button>`).join('')}</div></div>
+  <div class="field"><span>Daily times</span></div>
+  <div class="card">${['wake','breakfast','lunch','dinner','sleep'].map(k=>`<div class="tline"><label>${KEMOJI[k]} ${KLABEL[k]}</label><input type="time" data-in="rtime" data-k="${k}" data-u="lara" value="${u.routine[k]}"></div>`).join('')}</div>
+  <div style="flex:1"></div><button class="btn" data-a="obnext">Continue</button></div>`};
 SCR.invited=()=>SCR.connected();
 SCR.connected=()=>`<div class="flow" style="justify-content:center"><div class="phone2"><div style="display:flex;align-items:center"><span class="you">${av('lara',64)}</span><span class="them" style="margin-left:-12px">${av('sam',64)}</span></div><h1 style="text-align:center">${esc(PN())} joined</h1><p class="lead" style="max-width:34ch;text-align:center">${S.pair?'You are connected.':'Test build: '+esc(PN())+' is simulated on this phone.'} Three spaces now exist, and nobody sees anyone's private content.</p></div>
   <div style="display:grid;gap:10px"><div class="sp you"><span class="spi">${av('lara',36)}</span><span><b>${esc(MN())}'s My Space</b><small>Private to ${esc(MN())}</small></span></div><div class="sp them"><span class="spi">${av('sam',36)}</span><span><b>${esc(PN())}'s My Space</b><small>Private to ${esc(PN())}</small></span></div><div class="sp us"><span class="spi"><span class="avp">${av('lara',36)}${av('sam',36)}</span></span><span><b>${esc(MN())} &amp; ${esc(PN())}'s Our Space</b><small>Only what you both put here</small></span></div></div>
@@ -1442,7 +1451,7 @@ const INP={
   obname:e=>{ui.onb.name=e.value},obcontact:e=>{ui.onb.contact=e.value},obws:e=>{S.users.lara.workStart=e.value},obwe:e=>{S.users.lara.workEnd=e.value},
 };
 Object.assign(INP,{pname:e=>{if(ui.sheet&&ui.sheet.t==='invite')ui.sheet.n=e.value;else ui.onb.pname=e.value},invc:e=>{if(ui.sheet&&ui.sheet.t==='invite')ui.sheet.c=e.value;else ui.onb.pcontact=e.value},defvis:e=>{U().defVis3=e.value;persist()}});
-function applyOnb(){const u=S.users.lara,o=ui.onb;u.name=(o.name||'').trim()||'You';u.contact=o.contact||'';u.age=o.age;u.emp=o.emp;u.days=[...o.days];u.workLoc=o.loc}
+function applyOnb(){const u=S.users.lara,o=ui.onb;S.set.dayDone=true;u.name=(o.name||'').trim()||'You';u.contact=o.contact||'';u.age=o.age;u.emp=o.emp;u.days=[...o.days];u.workLoc=o.loc}
 const _obnext=A.obnext;
 A.obnext=()=>{const cur=route[0].n;if(cur==='signup'&&!(ui.onb.name||'').trim()){toast('Add your name to continue');return}if(cur==='signup'||cur==='profile')S.users.lara.name=(ui.onb.name||'').trim()||'You';_obnext()};
 A.notifperm=()=>{try{Notification.requestPermission().then(()=>render())}catch(e){toast('Not supported on this phone')}};
@@ -1959,6 +1968,8 @@ Object.assign(A,{
     S.pnotes.unshift({id:uid('n'),text:t.slice(0,1000),tag:'Remember',ref:'',refLabel:'',ts:NOW()});commit();toast('Saved. Only you can see it.')},
 });
 root.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='rq-t'){e.preventDefault();A.rqsave()}});
+
+Object.assign(INP,{obws:e=>{S.users.lara.workStart=e.value;S.users.lara.routine.work=e.value},obwe:e=>{S.users.lara.workEnd=e.value;S.users.lara.routine.workend=e.value}});
 
 const api={sync,render,setViewer,getViewer:()=>viewer,ui,route:()=>route,S:()=>S};
 APPS.push(api);
