@@ -541,11 +541,12 @@ const workBlock=(uid,day)=>{const u=U(uid),dow=new Date(day).getDay();if(!u.days
 /* ---------- check-in engine ---------- */
 const ckOf=(u,k)=>S.ck[u]?.[k];
 const isFinal=c=>c&&!c.until;
+const kindOn=(u,k,day)=>(k!=='work'&&k!=='workend')||U(u).days.includes(new Date(day).getDay());
 function activePrompt(u){
-  if(S.mode==='single')return null;
+  if(S.set.routineOff)return null;
   const now=NOW(),list=routineList(u);
   for(let i=list.length-1;i>=0;i--){const e=list[i],t=TODAY+hm2m(e.time)*60000;const c=ckOf(u,e.kind==='exercise'?'exercise':e.kind);
-    if(isFinal(c))continue;
+    if(isFinal(c)||!kindOn(u,e.kind,TODAY))continue;
     const from=c&&c.until?c.until:t;
     if(now>=from&&now<from+30*6e4&&now>=t)return e;
   }
@@ -704,7 +705,7 @@ SCR.today=()=>{
   const u=U(),p=PID(),now=NOW(),conn=isConn(),ap=activePrompt(V()),list=routineList(V());
   let nowShown=false;
   const rows=list.map(e=>{
-    const t=TODAY+hm2m(e.time)*6e4,c=S.mode==='single'?null:ckOf(V(),e.kind),final=isFinal(c),past=t<now,[t1,t2]=parts(t);
+    const t=TODAY+hm2m(e.time)*6e4,c=ckOf(V(),e.kind),final=isFinal(c),past=t<now,[t1,t2]=parts(t);
     let pre='';if(!nowShown&&t>now){nowShown=true;pre=`<div class="now-line" role="separator">Now · ${fmtM(S.clock)}</div>`}
     const isNow=ap&&ap.kind===e.kind;
     const state=final?(c.a==='skip'?'Skipped':CI[e.kind].opts.find(o=>o.k===c.a)?.label||'Done'):(isNow?'Now':'');
@@ -959,7 +960,9 @@ SCR.sharing=()=>{const u=U(),p=nm(PID()),sh=u.sharing;
   <div class="card"><ul style="margin:0;padding:0 0 0 18px;display:grid;gap:6px;color:var(--ink-2)"><li>Personal notes</li><li>Private reminders</li><li>Events marked Private</li><li>Check-ins set to Never</li></ul></div>`};
 
 SCR.notifset=()=>{const u=U(),p=nm(PID());
-  const quiet=`<div class="sec-h"><h2 class="sec">Quiet hours</h2></div>
+  const quiet=`<div class="sec-h"><h2 class="sec">Routine check-ins</h2></div>
+  <div class="list"><div class="set"><span class="sl"><div class="s1">Ask me during my day</div><div class="s2">A gentle question at each routine time, like “Are you having lunch?”. Work questions skip your days off.</div></span>${tog('routineOff',!S.set.routineOff,'Routine check-ins')}</div></div>
+  <div class="sec-h"><h2 class="sec">Quiet hours</h2></div>
   <div class="list"><div class="set"><span class="sl"><div class="s1">Quiet hours</div><div class="s2">Updates wait. Alarms still ring.</div></span>${tog('qh',u.quiet.on,'Quiet hours')}</div>
   ${u.quiet.on?`<div class="set"><span class="sl"><div class="s1">From / until</div></span><input type="time" data-in="qfrom" value="${u.quiet.from}" aria-label="From"><input type="time" data-in="qto" value="${u.quiet.to}" aria-label="Until"></div>`:''}
   <div class="set"><span class="sl"><div class="s1">Do Not Disturb</div><div class="s2">Pause updates until you turn it off.</div></span>${tog('dnd',u.dnd,'Do not disturb')}</div></div>`;
@@ -1636,7 +1639,7 @@ function buildSchedule(){
     for(const a of S.alarms){if(a.user&&a.user!==V()||!a.on)continue;if(a.days.length&&!a.days.includes(dow))continue;if(!a.days.length&&i>0)continue;add('al:'+a.id+dkey,day+hm2m(a.time)*6e4,a.label||'Alarm','Your alarm','alarm')}
     for(const o of remOcc(day)){const r=o.r;if((r.for===V()||r.joint)&&!r.done[o.k])add('rm:'+r.id+o.k,o.ts,r.title,(r.by!==r.for&&r.for===V())?nm(r.by)+' asked you':'Reminder','rem')}
     for(const e of evOcc(day)){if(e.e.owner===V()||e.e.owner==='us'){const lead=e.e.lead||0;add('ev:'+e.e.id+dkey,e.ts-lead*6e4,e.e.title,lead?`In ${lead} minutes`:'Starting now','ev')}}
-    if(S.mode==='mingle'){for(const e of routineList(V())){const c=ckOf(V(),e.kind);if(i===0&&isFinal(c))continue;const def=CI[e.kind];add('ci:'+e.kind+dkey,day+hm2m(e.time)*6e4,plain(def.title(U().name)),def.body,'checkin')}}
+    if(!S.set.routineOff){for(const e of routineList(V())){if(!kindOn(V(),e.kind,day))continue;const c=ckOf(V(),e.kind);if(i===0&&isFinal(c))continue;const def=CI[e.kind];add('ci:'+e.kind+(e.xid||'')+dkey,day+hm2m(e.time)*6e4,plain(def.title(U().name)),def.body,'ci-'+e.kind)}}
   }
   if(!(S.pset&&S.pset.datesOff)){for(const it of pDates()){if(it.sens&&it.who==='them')continue;for(const off of [0,3]){add('pd:'+it.id+':'+off+':'+dk(it.next),it.next-off*DAY+9*36e5,it.text,off===0?'Today':'In 3 days','pdate')}}}
   return items;
@@ -1925,6 +1928,11 @@ Object.assign(A,{
     S.set.qcustom=[t,...(S.set.qcustom||[])];ui.sheet=null;commit();toast('Added')},
   qdel:e=>{const i=+e.dataset.i,list=S.set.qcustom||[],q=list[i];if(q===undefined)return;S.set.qcustom=list.filter((_,j)=>j!==i);commit();toast('Removed',()=>{S.set.qcustom=[...(S.set.qcustom||[])];S.set.qcustom.splice(i,0,q);commit()})},
 });
+
+/* ---------- routine notifications: answer straight from the notification ---------- */
+function pAnswerFromNotif(kind,opt){const def=CI[kind];if(!def||!def.opts.some(o=>o.k===opt))return;const c=ckOf(V(),kind);if(isFinal(c))return;answer(V(),kind,opt);commit()}
+try{navigator.serviceWorker&&navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.t==='answer')pAnswerFromNotif(e.data.kind,e.data.opt)})}catch(e){}
+try{const m=/[?&]ans=([a-z]+):([a-z]+)/.exec(location.search);if(m&&S.onboarded){pAnswerFromNotif(m[1],m[2]);history.replaceState(null,'',location.pathname)}}catch(e){}
 
 const api={sync,render,setViewer,getViewer:()=>viewer,ui,route:()=>route,S:()=>S};
 APPS.push(api);
