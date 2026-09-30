@@ -727,6 +727,7 @@ SCR.today=()=>{
   return `<div class="head"><div><div class="eyebrow" style="display:flex;align-items:center;gap:6px"><span class="pdot"></span>My Space · ${WD[new Date(TODAY).getDay()]} ${new Date(TODAY).getDate()} ${MO[new Date(TODAY).getMonth()].slice(0,3)} · ${fmtM(S.clock)}</div><h1 class="title">${greeting()}, ${esc(u.name)}</h1></div>
     <div class="hbtns"><button class="ibtn" data-a="go" data-v="notifs" aria-label="Notifications${unread?', unread':''}">${ic('bell')}${unread?'<span class="dot"></span>':''}</button><button data-a="go" data-v="me" aria-label="Profile" style="border-radius:50%">${av(V(),44)}</button></div></div>
     ${chip}
+    ${dayCard()}
     ${REAL&&!S.pushOn&&pushSupported()?`<button class="strip" data-a="enablepush"><span class="ico">${ic('bell')}</span><span style="flex:1"><div class="s1">Turn on notifications</div><div class="s2">Get alarms, reminders and updates even when the app is closed</div></span><span class="chev">${ic('next',18)}</span></button>`:REAL&&!S.pushOn&&isIOS()&&!isStandalone()?`<div class="hint" style="margin-top:10px">For notifications on iPhone: tap Share, then Add to Home Screen, and open the app from there.</div>`:''}
     ${ap?promptCard(ap):''}
     ${asks.map(r=>askCard(r)).join('')}
@@ -893,7 +894,7 @@ SCR.notifs=()=>{
 
 SCR.me=()=>{const u=U(),p=nm(PID());
   const modeTxt=S.mode==='single'?'Single':S.pstate==='connected'?`Mingle · ${nm(V())} & ${p}`:S.pstate==='invited'?`Mingle · waiting for ${p}`:'Mingle · no partner yet';
-  const rows=[['routine','routine','Routine & alarms','Times, check-ins, alarms'],['privacy','shield','Privacy',S.mode==='single'?'Everything here is only yours':'What is shared, asked or kept'],...(isConn()?[['sharing','eye','Sharing settings','What '+p+' sees of your schedule']]:[]),['notifset','bell','Notification settings','Updates, quiet hours'],['myprofile','user','My Profile',S.mode==='single'?'Things about you, only yours':'What you share about you'],...(isConn()?[['pmem','us','Partner Memory','What '+p+' shared with you']]:[]),['relmode','us','Relationship mode',modeTxt],['settings','sliders','Settings','Clock, appearance, account'],['proto','play','About this test build','What works, notifications, reset']];
+  const rows=[['myday','sun','My day','Work days, hours, daily times'],['routine','routine','Routine & alarms','Times, check-ins, alarms'],['privacy','shield','Privacy',S.mode==='single'?'Everything here is only yours':'What is shared, asked or kept'],...(isConn()?[['sharing','eye','Sharing settings','What '+p+' sees of your schedule']]:[]),['notifset','bell','Notification settings','Updates, quiet hours'],['myprofile','user','My Profile',S.mode==='single'?'Things about you, only yours':'What you share about you'],...(isConn()?[['pmem','us','Partner Memory','What '+p+' shared with you']]:[]),['relmode','us','Relationship mode',modeTxt],['settings','sliders','Settings','Clock, appearance, account'],['proto','play','About this test build','What works, notifications, reset']];
   return `${route.length>1?bar('Me'):'<div class="head"><h1 class="title">Me</h1></div>'}
   <div style="display:flex;align-items:center;gap:16px;padding:8px 0 18px">${av(V(),68)}<div><h1 class="title" style="font-size:26px;margin:0">${esc(u.name)}</h1><div class="sub" style="margin:2px 0 0">${esc(u.emp)} · ${esc(u.workLoc)}</div><span class="chip" style="margin-top:8px">${S.mode==='single'?'Single · My Space':'Mingle · My Space + Our Space'}</span></div></div>
   ${isConn()?`<div class="card" style="display:flex;gap:12px;align-items:center;margin-bottom:14px"><span style="flex:1"><div style="font-weight:650">Quiet day</div><div class="s2" style="font-size:13px;color:var(--ink-2)">Pauses check-ins and sharing for today. ${esc(p)} isn't told.</div></span>${tog('quietDay',u.quietDay,'Quiet day')}</div>`:''}
@@ -1036,7 +1037,7 @@ SCR.proto=()=>{
   <button class="btn bad" data-a="sheet" data-v="reset">Reset all data</button>`};
 
 /* ---------- onboarding flow screens ---------- */
-const obOrder=()=>['signup','mode','profile','employment','workhours','routineSetup',...(ui.onb.mode==='mingle'?['invite']:[]),'spaces'];
+const obOrder=()=>['signup','mode',...(ui.onb.mode==='mingle'?['invite']:[]),'spaces'];
 const stepList=()=>obOrder().slice(2,-1);
 const flowTop=(steps)=>{const cur=route[0].n,sl=stepList(),i=sl.indexOf(cur);return `<div style="display:flex;align-items:center;gap:8px;margin-left:-10px"><button class="ibtn" data-a="obback" aria-label="Back">${ic('back')}</button>${steps&&i>=0?`<div style="flex:1"><div class="steps" aria-label="Step ${i+1} of ${sl.length}">${sl.map((_,j)=>`<i class="${j<=i?'on':''}"></i>`).join('')}</div></div><button class="link" data-a="obskip">Skip</button>`:''}</div>`};
 const artSingle=`<svg width="92" height="92" viewBox="0 0 100 100" aria-hidden="true"><path d="M78 68A34 34 0 1 1 78 32" fill="none" stroke="var(--you)" stroke-width="7" stroke-linecap="round"/><path d="M48 50L48 27" stroke="var(--you)" stroke-width="8" stroke-linecap="round"/><circle cx="48" cy="50" r="5" fill="var(--you)"/></svg>`;
@@ -1045,10 +1046,9 @@ SCR.splash=()=>{if(!ui.splashTimer){ui.splashTimer=setTimeout(()=>{if(route[rout
   return `<div class="splash" style="animation:fade .4s"><div style="color:#F2F5F6">${MARK(84)}</div><b>I Clock You</b><div class="tagline" style="color:#9FB2B9">Time, routine, together</div></div>`};
 SCR.welcome=()=>`<div class="flow"><div class="hero"><div>${MARK(52)}</div><h1>One clock for your day. Two, if you want.</h1><p class="lead">Notes, reminders, alarms and your schedule in My Space. Add a partner and you get Our Space too.</p></div>
   <div style="display:grid;gap:8px"><button class="btn" data-a="obgo" data-v="signup">Get started</button><p style="font-size:12.5px;color:var(--ink-2);text-align:center;margin:4px 0 0">Test build. Your data stays on this phone.</p></div></div>`;
-SCR.signup=()=>`<div class="flow">${flowTop()}<div><h1>Let's set you up</h1><p class="lead">Just your name to start. Nothing leaves this phone in the test build.</p></div>
+SCR.signup=()=>`<div class="flow">${flowTop()}<div><h1>Let's set you up</h1><p class="lead">Just your name. You can add your work days and daily times later, in one minute, when you're ready.</p></div>
   <div style="display:grid;gap:12px">
   <label class="field"><span>Your name</span><input type="text" data-in="obname" value="${esc(ui.onb.name)}" placeholder="Your name" autocomplete="given-name"></label>
-  <label class="field"><span>Email or phone (optional)</span><input type="text" data-in="obcontact" value="${esc(ui.onb.contact)}" placeholder="Optional" autocomplete="email"></label>
   <button class="btn" data-a="obnext">Continue</button></div></div>`;
 SCR.login=()=>SCR.signup();
 const MN=()=>S.users.lara.name||'You',PN=()=>S.users.sam.name||'Partner';
@@ -1090,7 +1090,7 @@ SCR.connected=()=>`<div class="flow" style="justify-content:center"><div class="
   ${pushSupported()&&!S.pushOn?`<button class="btn sec" data-a="enablepush">Turn on notifications</button>`:''}
   <button class="btn" data-a="obgo" data-v="sharePresets">Choose what to share</button></div>`;
 SCR.sharePresets=()=>`<div class="flow"><div><h1>What would you like to share with ${esc(PN())}?</h1><p class="lead">You can change any of this, item by item, in Privacy.</p></div>
-  <div style="display:grid;gap:10px">${[['essentials','Just the essentials','Wake up, sleep and working late. We ask each time.'],['everything','Everything','Share every check-in automatically.'],['nothing','Nothing yet','Keep it all to yourself. Our Space still works.']].map(([v,t,sub])=>`<button class="preset" data-a="obpreset" data-v="${v}" aria-pressed="${ui.onb.preset===v}"><span class="radio"></span><span><b>${t}</b><span>${sub}</span></span></button>`).join('')}</div>
+  <div style="display:grid;gap:10px">${[['essentials','Just the essentials','Wake up, work start and finish, and sleep. Shared in one tap, with no questions.'],['everything','Everything','Share every check-in automatically.'],['nothing','Nothing yet','Keep it all to yourself. Our Space still works.']].map(([v,t,sub])=>`<button class="preset" data-a="obpreset" data-v="${v}" aria-pressed="${ui.onb.preset===v}"><span class="radio"></span><span><b>${t}</b><span>${sub}</span></span></button>`).join('')}</div>
   <div style="flex:1"></div><button class="btn" data-a="obconnect">Open Our Space</button></div>`;
 
 /* ---------- sheets ---------- */
@@ -1419,7 +1419,7 @@ const A={
   none:()=>{},
 };
 function applyPreset(){const u=S.users.lara,p=ui.onb.preset;const set=(v,list)=>list.forEach(k=>u.share[k]=v);
-  if(p==='everything'){set('always',['wake','breakfast','work','lunch','workend','dinner','sleep'])}else if(p==='nothing'){set('never',['wake','breakfast','work','lunch','workend','dinner','sleep'])}else{set('ask',['wake','work','workend','sleep']);set('never',['breakfast','lunch','dinner'])}}
+  if(p==='everything'){set('always',['wake','breakfast','work','lunch','workend','dinner','sleep'])}else if(p==='nothing'){set('never',['wake','breakfast','work','lunch','workend','dinner','sleep'])}else{set('always',['wake','work','workend','sleep']);set('never',['breakfast','lunch','dinner'])}}
 root.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el||!A[el.dataset.a])return;if(el.tagName==='SELECT')return;A[el.dataset.a](el)});
 root.addEventListener('keydown',e=>{if(e.key==='Escape'){if(ui.ring){ui.ring=null;render()}else if(ui.sheet){ui.sheet=null;render()}}
   if(e.key==='Enter'&&e.target.id==='f-title'&&ui.sheet?.t==='create'&&ui.sheet.d.kind==='reminder'){e.preventDefault();saveDraft()}});
@@ -1770,6 +1770,7 @@ function profCards(){
   pini();if(!isConn())return '';const p=nm(PID());let h='';
   const n=S.pmem.length;
   h+=`<button class="card" data-a="go" data-v="pmem" style="display:flex;gap:12px;align-items:center;width:100%;text-align:left;margin-top:8px"><span class="rico" style="background:var(--them-soft)">${ic('user')}</span><span class="sl" style="flex:1"><div style="font-weight:650">Know ${esc(p)} better</div><div class="s2" style="font-size:13px;color:var(--ink-2)">${n?n+' thing'+(n>1?'s':'')+' '+esc(p)+' shared with you':esc(p)+' has not shared anything yet. That is fine.'}</div></span><span class="chev">${ic('next',18)}</span></button>`;
+  h+=`<div class="card" style="display:grid;gap:8px;margin-top:8px"><div style="font-weight:650">Remember something about ${esc(p)}</div><div style="display:flex;gap:8px"><input type="text" id="rq-t" maxlength="200" placeholder="e.g. Loves the blue scarf" aria-label="Remember something about ${esc(p)}" autocomplete="off"><button class="btn sm" data-a="rqsave">Save</button></div><div class="s2" style="font-size:12.5px;color:var(--ink-2)">${ic('lock',12)} Only on this phone.${S.pnotes.length?` <button class="link" data-a="go" data-v="pmem">${S.pnotes.length} saved</button>`:''}</div></div>`;
   if(!S.pset.datesOff)for(const u of pUpcoming().slice(0,2)){
     const gifts=(u.who==='them'&&(u.key==='birthday'||u.key==='anniversary'))?S.pmem.filter(f=>f.key==='love'||f.key==='wish').map(f=>f.value.replace(/\n/g,', ')).join(', '):'';
     const avoid=(u.who==='them'&&gifts)?(S.pmem.find(f=>f.key==='notwant')||{}).value:'';
@@ -1933,6 +1934,31 @@ Object.assign(A,{
 function pAnswerFromNotif(kind,opt){const def=CI[kind];if(!def||!def.opts.some(o=>o.k===opt))return;const c=ckOf(V(),kind);if(isFinal(c))return;answer(V(),kind,opt);commit()}
 try{navigator.serviceWorker&&navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.t==='answer')pAnswerFromNotif(e.data.kind,e.data.opt)})}catch(e){}
 try{const m=/[?&]ans=([a-z]+):([a-z]+)/.exec(location.search);if(m&&S.onboarded){pAnswerFromNotif(m[1],m[2]);history.replaceState(null,'',location.pathname)}}catch(e){}
+
+/* ---------- My day: one quick screen instead of a long setup ---------- */
+function dayCard(){
+  if(!S.onboarded||S.set.dayDone||TODAY<(S.set.dayCardOff||0))return '';
+  return `<div class="card" style="display:grid;gap:8px;margin:10px 0"><div><div style="font-weight:650">Set up your day (1 minute)</div><div class="s2" style="font-size:13.5px;color:var(--ink-2)">Add your work days and daily times so check-ins arrive at the right moment.</div></div><div class="btns"><button class="btn sm" data-a="go" data-v="myday">Set up</button><button class="btn sec sm" data-a="daylater">Later</button></div></div>`;
+}
+SCR.myday=()=>{const u=U();
+  return `${bar('My day')}
+  <p class="sub" style="margin:0 0 12px">Everything here is optional. You can change it any time in Routine.</p>
+  <div class="field"><span>Work days</span><div class="dchips">${[1,2,3,4,5,6,0].map(d=>`<button data-a="mdday" data-v="${d}" aria-pressed="${u.days.includes(d)}" aria-label="${WDL[d]}">${WD[d][0]}</button>`).join('')}</div></div>
+  <div class="card" style="margin-top:12px"><div class="tline"><label>Work starts</label><input type="time" value="${u.workStart}" data-in="mdws"></div><div class="tline"><label>Work ends</label><input type="time" value="${u.workEnd}" data-in="mdwe"></div></div>
+  <div class="field" style="margin-top:12px"><span>Where do you work?</span><div class="chipsel">${['Office','Work from home','Hybrid'].map(a=>`<button data-a="mdloc" data-v="${a}" aria-pressed="${u.workLoc===a}">${a}</button>`).join('')}</div></div>
+  <div class="sec-h"><h2 class="sec">Daily times</h2></div>
+  <div class="card">${['wake','breakfast','lunch','dinner','sleep'].map(k=>`<div class="tline"><label>${KEMOJI[k]} ${KLABEL[k]}</label><input type="time" data-in="rtime" data-k="${k}" value="${u.routine[k]}"></div>`).join('')}</div>
+  <button class="btn" style="margin-top:14px" data-a="mddone">Done</button>`};
+Object.assign(INP,{mdws:e=>{const u=U();u.workStart=e.value;u.routine.work=e.value;persist()},mdwe:e=>{const u=U();u.workEnd=e.value;u.routine.workend=e.value;persist()}});
+Object.assign(A,{
+  mdday:e=>{const u=U(),d=+e.dataset.v;u.days=u.days.includes(d)?u.days.filter(x=>x!==d):[...u.days,d];commit()},
+  mdloc:e=>{U().workLoc=e.dataset.v;commit()},
+  mddone:()=>{S.set.dayDone=true;back();toast('Your day is set. Check-ins will follow it.')},
+  daylater:()=>{S.set.dayCardOff=TODAY+3*DAY;commit()},
+  rqsave:()=>{pini();const el=$('#rq-t'),t=(el&&el.value||'').trim();if(!t){toast('Type something to remember first');return}
+    S.pnotes.unshift({id:uid('n'),text:t.slice(0,1000),tag:'Remember',ref:'',refLabel:'',ts:NOW()});commit();toast('Saved. Only you can see it.')},
+});
+root.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='rq-t'){e.preventDefault();A.rqsave()}});
 
 const api={sync,render,setViewer,getViewer:()=>viewer,ui,route:()=>route,S:()=>S};
 APPS.push(api);
