@@ -146,7 +146,7 @@ h2.sec{font:650 12px/1 var(--f-body);letter-spacing:.07em;text-transform:upperca
 .qm{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;margin:0 -20px;padding:2px 20px 6px;scrollbar-width:thin;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;scroll-snap-type:x proximity;cursor:grab}.qm.drag{cursor:grabbing;scroll-snap-type:none;user-select:none}.qm button{scroll-snap-align:start}
 .qm::-webkit-scrollbar{height:4px}.qm::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
 .qm button{flex:none;padding:10px 14px;border-radius:99px;background:var(--surface);border:1px solid var(--line);font-weight:600;font-size:14px;min-height:44px}
-.qm button:active{background:var(--them-soft)}
+.qm button:active{background:var(--them-soft)}.qm .qadd{display:inline-flex;align-items:center;gap:4px;background:var(--you);color:var(--on-you);border-color:transparent}.qc{flex:none;display:inline-flex;align-items:center;background:var(--them-soft);border:1px solid var(--line);border-radius:99px}.qc>button{border:0;background:none;min-height:44px}.qc>button:first-child{padding-right:6px}.qm .qc .qx{padding:0 12px 0 4px;color:var(--ink-2)}
 .uprow{display:flex;gap:12px;align-items:center;padding:11px 0}
 .uprow .tm{min-width:58px;text-align:left}
 
@@ -777,7 +777,7 @@ SCR.us=()=>{
   const act=S.feed.filter(f=>f.to===V()&&['status','done','reply'].includes(f.kind)).sort((a,b)=>b.ts-a.ts).slice(0,3);
   return band+`${S.pair?`<div class="chip" role="status" style="margin-top:8px">${linkOnline()?'● Live with '+esc(nm(p)):'○ '+esc(nm(p))+' is offline. Changes sync when you both are online.'}</div>`:`<div class="hint them" style="margin-top:8px">Test build: ${esc(nm(p))} is simulated on this phone.</div>`}${profCards()}<div class="sec-h" style="margin-top:14px"><h2 class="sec">Today</h2><button class="link" data-a="sheet" data-v="status">Set my status</button></div>
     <div class="dash">${cols.join('')}</div>
-    <div class="qm" style="margin-top:12px">${QUICK.map(q=>`<button data-a="quick" data-v="${esc(q)}">${esc(q)}</button>`).join('')}</div>
+    <div class="qm" style="margin-top:12px"><button class="qadd" data-a="qadd" aria-label="Add your own message">${ic('plus',16)} Add</button>${(S.set.qcustom||[]).map((q,i)=>`<span class="qc"><button data-a="quick" data-v="${esc(q)}">${esc(q)}</button><button class="qx" data-a="qdel" data-i="${i}" aria-label="Remove ${esc(q)}">${ic('x',12)}</button></span>`).join('')}${QUICK.map(q=>`<button data-a="quick" data-v="${esc(q)}">${esc(q)}</button>`).join('')}</div>
     ${ourLists(false)}
     ${act.length?`<div class="sec-h"><h2 class="sec">Shared activity</h2></div><div class="list">${act.map(f=>`<div class="pr"><span class="${tn(f.from)}">${av(f.from,32)}</span><span class="sl"><div class="s1" style="font-weight:500">${esc(f.text)}</div><div class="s2">${fmtT(f.ts)}</div></span></div>`).join('')}</div>`:''}
     <div class="sec-h"><h2 class="sec">Manage</h2></div>
@@ -1172,6 +1172,10 @@ SH.disconnect=()=>`<div class="scrim" data-a="close"></div><div class="sheet" ro
   <div class="hint you">If you feel unsafe or pressured to share, you can leave at any time. Safety resources are in Settings.</div>
   <button class="btn bad" data-a="disc">Disconnect</button><button class="btn sec" data-a="close">Keep connected</button></div>`;
 SH.logout=()=>`<div class="scrim" data-a="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Log out"><div class="grab"></div><h2>Log out?</h2><p class="sub2">${S.pair?'You will be disconnected from '+esc(nm(PID()))+'. ':''}Everything on this phone is cleared, because your data only lives here. You can set up again any time.</p><button class="btn bad" data-a="logoutgo">Log out</button><button class="btn sec" data-a="close">Cancel</button></div>`;
+SH.qadd=()=>{const s=ui.sheet;return `<div class="scrim" data-a="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Add a quick message"><div class="grab"></div><h2>Add a quick message</h2><p class="sub2">It appears at the start of the row so you can send it in one tap. It stays on this phone.</p>
+  <input type="text" id="qa-t" data-in="qat" maxlength="60" value="${esc(s.text||'')}" placeholder="e.g. Coming home early" autocomplete="off">
+  <div class="err" id="qa-err" role="alert"></div>
+  <button class="btn" data-a="qadsave">Save</button><button class="btn sec" data-a="close">Cancel</button></div>`};
 SH.reset=()=>`<div class="scrim" data-a="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Restart"><div class="grab"></div><h2>Restart the demo?</h2><p class="sub2">This clears everything you changed and starts onboarding again.</p><button class="btn bad" data-a="resetgo">Restart</button><button class="btn sec" data-a="close">Cancel</button></div>`;
 
 /* ---------- demo panel ---------- */
@@ -1910,6 +1914,17 @@ root.addEventListener('mousedown',e=>{const q=e.target.closest&&e.target.closest
 window.addEventListener('mousemove',e=>{if(!dq)return;const dx=e.clientX-sx;if(Math.abs(dx)>4){moved=true;dq.classList.add('drag')}if(moved)dq.scrollLeft=sl-dx});
 window.addEventListener('mouseup',()=>{if(dq){const q=dq;dq=null;setTimeout(()=>q.classList.remove('drag'),0)}});
 root.addEventListener('click',e=>{if(moved&&e.target.closest&&e.target.closest('.qm')){e.stopPropagation();e.preventDefault();moved=false}},true);}
+
+Object.assign(INP,{qat:e=>{ui.sheet.text=e.value}});
+Object.assign(A,{
+  qadd:()=>{ui.sheet={t:'qadd',text:''};render();setTimeout(()=>{const f=$('#qa-t');f&&f.focus()},60)},
+  qadsave:()=>{const t=(ui.sheet.text||'').trim().slice(0,60),err=m=>{const x=$('#qa-err');if(x)x.textContent=m};
+    if(!t)return err('Type a message first.');
+    const all=[...(S.set.qcustom||[]),...QUICK];if(all.some(x=>x.toLowerCase()===t.toLowerCase()))return err('You already have that one.');
+    if((S.set.qcustom||[]).length>=30)return err('That is plenty. Remove one first.');
+    S.set.qcustom=[t,...(S.set.qcustom||[])];ui.sheet=null;commit();toast('Added')},
+  qdel:e=>{const i=+e.dataset.i,list=S.set.qcustom||[],q=list[i];if(q===undefined)return;S.set.qcustom=list.filter((_,j)=>j!==i);commit();toast('Removed',()=>{S.set.qcustom=[...(S.set.qcustom||[])];S.set.qcustom.splice(i,0,q);commit()})},
+});
 
 const api={sync,render,setViewer,getViewer:()=>viewer,ui,route:()=>route,S:()=>S};
 APPS.push(api);
