@@ -775,13 +775,13 @@ SCR.us=()=>{
     return `<div class="dc ${tn(id)}"><div class="dn">${av(id,32)}${esc(u.name)}</div>${stx}${lines.length?`<ul>${lines.map(l=>`<li><span>${esc(l[0])}</span><b>${l[1]}</b></li>`).join('')}</ul>`:'<div class="none">Nothing shared</div>'}</div>`};
   const cols=me==='lara'?[col('lara'),col('sam')]:[col('sam'),col('lara')];
   const act=S.feed.filter(f=>f.to===V()&&['status','done','reply'].includes(f.kind)).sort((a,b)=>b.ts-a.ts).slice(0,3);
-  return band+`${S.pair?`<div class="chip" role="status" style="margin-top:8px">${linkOnline()?'● Live with '+esc(nm(p)):'○ '+esc(nm(p))+' is offline. Changes sync when you both are online.'}</div>`:`<div class="hint them" style="margin-top:8px">Test build: ${esc(nm(p))} is simulated on this phone.</div>`}<div class="sec-h" style="margin-top:14px"><h2 class="sec">Today</h2><button class="link" data-a="sheet" data-v="status">Set my status</button></div>
+  return band+`${S.pair?`<div class="chip" role="status" style="margin-top:8px">${linkOnline()?'● Live with '+esc(nm(p)):'○ '+esc(nm(p))+' is offline. Changes sync when you both are online.'}</div>`:`<div class="hint them" style="margin-top:8px">Test build: ${esc(nm(p))} is simulated on this phone.</div>`}${profCards()}<div class="sec-h" style="margin-top:14px"><h2 class="sec">Today</h2><button class="link" data-a="sheet" data-v="status">Set my status</button></div>
     <div class="dash">${cols.join('')}</div>
     <div class="qm" style="margin-top:12px">${QUICK.map(q=>`<button data-a="quick" data-v="${esc(q)}">${esc(q)}</button>`).join('')}</div>
     ${ourLists(false)}
     ${act.length?`<div class="sec-h"><h2 class="sec">Shared activity</h2></div><div class="list">${act.map(f=>`<div class="pr"><span class="${tn(f.from)}">${av(f.from,32)}</span><span class="sl"><div class="s1" style="font-weight:500">${esc(f.text)}</div><div class="s2">${fmtT(f.ts)}</div></span></div>`).join('')}</div>`:''}
     <div class="sec-h"><h2 class="sec">Manage</h2></div>
-    <div class="list"><button class="pr" data-a="go" data-v="sharing"><span class="sl"><div class="s1">What I share with ${esc(nm(p))}</div><div class="s2">Schedule, status, check-ins</div></span><span class="chev">${ic('next',18)}</span></button><button class="pr" data-a="go" data-v="relmode"><span class="sl"><div class="s1">Relationship mode</div><div class="s2">Mingle · ${esc(nm(V()))} &amp; ${esc(nm(p))}</div></span><span class="chev">${ic('next',18)}</span></button></div>`;
+    <div class="list"><button class="pr" data-a="go" data-v="myprofile"><span class="sl"><div class="s1">My Profile</div><div class="s2">Things I choose to tell ${esc(nm(p))}</div></span><span class="chev">${ic('next',18)}</span></button><button class="pr" data-a="go" data-v="sharing"><span class="sl"><div class="s1">What I share with ${esc(nm(p))}</div><div class="s2">Schedule, status, check-ins</div></span><span class="chev">${ic('next',18)}</span></button><button class="pr" data-a="go" data-v="relmode"><span class="sl"><div class="s1">Relationship mode</div><div class="s2">Mingle · ${esc(nm(V()))} &amp; ${esc(nm(p))}</div></span><span class="chev">${ic('next',18)}</span></button></div>`;
 };
 const lockedPreview=()=>`<div class="sec-h"><h2 class="sec">What Our Space will hold</h2></div><div class="list">${[['check','Shared tasks','Buy groceries, pay the bill'],['cal','Shared schedule','Dinner, movie night, trips'],['user','Partner status','Awake, working, home. Only what each of you chooses'],['note','Shared notes and lists','Weekend grocery list']].map(([i,t,s])=>`<div class="pr" style="opacity:.75"><span class="rico" style="background:var(--surface-2);color:var(--ink-2)">${ic(i)}</span><span class="sl"><div class="s1">${t}</div><div class="s2">${s}</div></span>${ic('lock',16)}</div>`).join('')}</div>`;
 function ourLists(ro){
@@ -892,7 +892,7 @@ SCR.notifs=()=>{
 
 SCR.me=()=>{const u=U(),p=nm(PID());
   const modeTxt=S.mode==='single'?'Single':S.pstate==='connected'?`Mingle · ${nm(V())} & ${p}`:S.pstate==='invited'?`Mingle · waiting for ${p}`:'Mingle · no partner yet';
-  const rows=[['routine','routine','Routine & alarms','Times, check-ins, alarms'],['privacy','shield','Privacy',S.mode==='single'?'Everything here is only yours':'What is shared, asked or kept'],...(isConn()?[['sharing','eye','Sharing settings','What '+p+' sees of your schedule']]:[]),['notifset','bell','Notification settings','Updates, quiet hours'],['relmode','us','Relationship mode',modeTxt],['settings','sliders','Settings','Clock, appearance, account'],['proto','play','About this test build','What works, notifications, reset']];
+  const rows=[['routine','routine','Routine & alarms','Times, check-ins, alarms'],['privacy','shield','Privacy',S.mode==='single'?'Everything here is only yours':'What is shared, asked or kept'],...(isConn()?[['sharing','eye','Sharing settings','What '+p+' sees of your schedule']]:[]),['notifset','bell','Notification settings','Updates, quiet hours'],['myprofile','user','My Profile',S.mode==='single'?'Things about you, only yours':'What you share about you'],...(isConn()?[['pmem','us','Partner Memory','What '+p+' shared with you']]:[]),['relmode','us','Relationship mode',modeTxt],['settings','sliders','Settings','Clock, appearance, account'],['proto','play','About this test build','What works, notifications, reset']];
   return `${route.length>1?bar('Me'):'<div class="head"><h1 class="title">Me</h1></div>'}
   <div style="display:flex;align-items:center;gap:16px;padding:8px 0 18px">${av(V(),68)}<div><h1 class="title" style="font-size:26px;margin:0">${esc(u.name)}</h1><div class="sub" style="margin:2px 0 0">${esc(u.emp)} · ${esc(u.workLoc)}</div><span class="chip" style="margin-top:8px">${S.mode==='single'?'Single · My Space':'Mingle · My Space + Our Space'}</span></div></div>
   ${isConn()?`<div class="card" style="display:flex;gap:12px;align-items:center;margin-bottom:14px"><span style="flex:1"><div style="font-weight:650">Quiet day</div><div class="s2" style="font-size:13px;color:var(--ink-2)">Pauses check-ins and sharing for today. ${esc(p)} isn't told.</div></span>${tog('quietDay',u.quietDay,'Quiet day')}</div>`:''}
@@ -994,7 +994,7 @@ SCR.settings=()=>{const s=S.set;return `${bar('Settings')}
 SCR.partner=()=>{const p=PID(),u=U(p),st=statusOf(p),you=U();
   return `${bar(esc(nm(p)))}
   <div style="display:flex;align-items:center;gap:14px;padding:6px 0 16px"><span class="them">${av(p,68)}</span><div><h1 class="title" style="font-size:26px;margin:0">${esc(nm(p))}</h1><div class="sub" style="margin:2px 0 0">${st?`${st.emoji} ${esc(st.label)} · since ${fmtT(st.ts)}`:'No status right now'}</div></div></div>
-  <div class="btns"><button class="btn them" data-a="add" data-v="remindp">${ic('send',20)}Remind ${esc(nm(p))}</button><button class="btn sec" data-a="tab" data-v="us">Open Us</button></div>
+  <div class="btns"><button class="btn them" data-a="add" data-v="remindp">${ic('send',20)}Remind ${esc(nm(p))}</button><button class="btn sec" data-a="go" data-v="pmem">Memory</button><button class="btn sec" data-a="tab" data-v="us">Open Us</button></div>
   <div class="sec-h"><h2 class="sec">${esc(nm(p))}'s day</h2></div>
   <div class="list">${u.sharing.routineTimes==='never'?`<div class="pr"><span class="sl"><div class="s1">${esc(nm(p))} isn't sharing routine times</div></span></div>`:routineList(p).filter(e=>['wake','work','lunch','workend','exercise','sleep'].includes(e.kind)).map(e=>`<div class="pr"><span class="rico" style="background:var(--them-soft)">${KEMOJI[e.kind]}</span><span class="sl"><div class="s1">${esc(e.label)}</div></span><b style="font-variant-numeric:tabular-nums">${fmtHM(e.time)}</b></div>`).join('')}</div>
   <div class="sec-h"><h2 class="sec">Time zone</h2></div>
@@ -1527,10 +1527,10 @@ function onMsg(m){
   switch(m.t){
     case 'profile':{const p=m.p||{};Object.assign(S.users.sam,{name:p.name||S.users.sam.name,routine:p.routine||{},extra:p.extra||[],workStart:p.workStart||'09:00',workEnd:p.workEnd||'18:00',workLoc:p.workLoc||'Office',days:p.days||[1,2,3,4,5],sharing:Object.assign({work:'details',meetings:'details',routineTimes:'always',status:'always'},p.sharing||{})});commit();break}
     case 'status':{S.status.sam=m.s||null;commit();break}
-    case 'doc':{adoptDoc(m.k,m.d);commit();break}
-    case 'del':{if(S[m.k]){S[m.k]=S[m.k].filter(x=>x.id!==m.id)}if(S.link)delete S.link.sent[m.k+':'+m.id];commit();break}
+    case 'doc':{if(m.k==='pfield')adoptP(m.d);else adoptDoc(m.k,m.d);commit();break}
+    case 'del':{if(m.k==='pfield')S.pmem=(S.pmem||[]).filter(x=>x.id!==m.id);if(S[m.k]){S[m.k]=S[m.k].filter(x=>x.id!==m.id)}if(S.link)delete S.link.sent[m.k+':'+m.id];commit();break}
     case 'feed':{onFeed(m.f);break}
-    case 'bye':{S.pair=null;S.mode='single';S.pstate='readonly';S.status.sam=null;route=[{n:'today'}];commit();toast(PN()+' left Our Space. It is read-only now.');break}
+    case 'bye':{pClearPartner();S.pair=null;S.mode='single';S.pstate='readonly';S.status.sam=null;route=[{n:'today'}];commit();toast(PN()+' left Our Space. It is read-only now.');break}
   }
 }
 const nowT=()=>Date.now();
@@ -1565,6 +1565,7 @@ function linkPush(all){
   for(const r of S.rems)if(sharedRem(r))cur['rems:'+r.id]=['rems',r,wireDoc('rems',r)];
   for(const e of S.events)if(sharedEv(e))cur['events:'+e.id]=['events',e,wireDoc('events',e)];
   for(const n of S.notes)if(sharedNote(n))cur['notes:'+n.id]=['notes',n,wireDoc('notes',n)];
+  for(const f of pShared())cur['pfield:'+f.id]=['pfield',f,pwire(f)];
   for(const key in cur){const [k,local,d]=cur[key],h=canon(d);
     if(all||L.sent[key]!==h){
       const isNew=L.sent[key]===undefined;
@@ -1633,6 +1634,7 @@ function buildSchedule(){
     for(const e of evOcc(day)){if(e.e.owner===V()||e.e.owner==='us'){const lead=e.e.lead||0;add('ev:'+e.e.id+dkey,e.ts-lead*6e4,e.e.title,lead?`In ${lead} minutes`:'Starting now','ev')}}
     if(S.mode==='mingle'){for(const e of routineList(V())){const c=ckOf(V(),e.kind);if(i===0&&isFinal(c))continue;const def=CI[e.kind];add('ci:'+e.kind+dkey,day+hm2m(e.time)*6e4,plain(def.title(U().name)),def.body,'checkin')}}
   }
+  if(!(S.pset&&S.pset.datesOff)){for(const it of pDates()){if(it.sens&&it.who==='them')continue;for(const off of [0,3]){add('pd:'+it.id+':'+off+':'+dk(it.next),it.next-off*DAY+9*36e5,it.text,off===0?'Today':'In 3 days','pdate')}}}
   return items;
 }
 let syncT=null,lastPrefs='',lastSched='';
@@ -1689,6 +1691,218 @@ if(REAL){
   try{navigator.serviceWorker&&navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.t==='poll')pollOnce()})}catch(e){}
   setTimeout(()=>{if(S.pair)pollOnce();serverSyncSoon()},600);
 }
+/* ---------- Partner Profile & Partner Memory ---------- */
+/* Private by default. Only fields with share=true, while connected and not paused, are ever sent (see pShared/pwire).
+   Notes about the partner (S.pnotes) and stars (S.pstars) never leave this phone. */
+const PCAT=[
+['basics','About me','🙂',['nickname|Nickname|t','birthday|Birthday|d','about|About me in one line|t','type|Introvert, extrovert, or in between|t']],
+['fav','Favourites','⭐',['food|Favourite food|t','color|Favourite colour|t','movie|Favourite movie|t','series|Favourite TV series|t','actor|Favourite actor|t','song|Favourite song|t','artist|Favourite artist|t','book|Favourite book|t','place|Favourite place|t','hobby|Favourite hobby|t','activity|Favourite activity|t','sport|Favourite sport|t','game|Favourite game|t','flower|Favourite flower|t','animal|Favourite animal|t','season|Favourite season|t','holiday|Favourite holiday|t','style|Clothing style|t','brands|Favourite brands|t','perfume|Favourite fragrance|t','gifttype|Favourite kind of gift|t','freetime|Favourite way to spend free time|t']],
+['food','Food and drink','🍽️',['cuisine|Favourite cuisine|t','dish|Favourite dish|t','restaurant|Favourite restaurant|t','dessert|Favourite dessert|t','drink|Favourite drink|t','diet|Vegetarian or not|t','dislike|Foods I dislike|l','cannot|Foods I cannot eat|l|s','spice|Spice level|t','comfort|Comfort food|t','breakfast|Favourite breakfast|t','snack|Late-night snack|t']],
+['gifts','Gifts','🎁',['love|Things I would love to receive|l','notwant|Things I do not want|l','gbrands|Brands I like|t','gcolors|Colours I like|t','stores|Favourite stores|t','gbooks|Books I like|t','gflowers|Flowers I like|t','clothes|Clothing preferences|l','wish|Wishlist item|t|m','giftidea|Gift idea|t|m','prevgift|A previous gift|t|m','occasions|Gift occasions|t']],
+['travel','Travel','✈️',['dream|Dream destinations|l','visited|Places I have visited|l','want|Places I want to visit|l','vtype|Kind of vacation I like|t','adventure|Adventure or relaxation|t','bucket|Travel bucket list|l','countries|Countries I want to see|l','together|Things I want us to experience together|l','tdislike|Travel things I avoid|t']],
+['likes','Likes and dislikes','👍',['flike|Foods I like|l','enjoy|Things I enjoy|l','avoid|Things I avoid|l','plike|Places I like|l','pdislike|Places I do not like|l','aenjoy|Activities I enjoy|l','anotenjoy|Activities I do not enjoy|l','social|Social preferences|l']],
+['person','Personality and feelings','💭',['happy|Things that make me happy|l','calm|Things that calm me down|l','annoy|Things that annoy me|l','passion|Things I am passionate about|l','afraid|Things I am afraid of|l|s','value|Things I value|l','appreciated|What makes me feel appreciated|l','affection|How I like to receive affection|l','timetogether|How I like to spend time together|l','space|What I do when I need personal space|l']],
+['rel','Relationship','💞',['support|How I like to be supported|l','comm|How I like to communicate|l','special|What makes me feel special|l','appreciate|What I appreciate from you|l','dothings|Things I want us to do together|l','dateideas|Favourite date ideas|l','weekend|My ideal weekend|l','remember|Things I want you to remember|l','small|Small things that make me happy|l']],
+['dates','Important dates','📅',['anniversary|Relationship anniversary|d','firstmeet|The day we met|d','firstdate|Our first date|d','firsttrip|Our first trip|d','family|Family birthday|d|m','personal|Personal important date|d|ms','milestone|Relationship milestone|d|m']],
+['stories','Memories and stories','📖',['childhood|My favourite childhood memory|l','splace|A place that is special to me|l','dreamexp|My dream experience|l','always|Something I always wanted to do|l','songmem|A song that reminds me of something|l','moviemem|A movie that has emotional meaning|l','trip|A memorable trip|l','funny|A funny story|l','relmem|A relationship memory|l','aboutme|Something I want you to know about me|l','story|Another memory|l|m']],
+['know','Things I want you to know','💌',['k_happy|What makes me happy|l','k_loved|What makes me feel loved|l','k_appr|What I appreciate|l','k_dislike|What I dislike|l','k_space|When I need space|l','k_support|How to support me|l','k_comm|How I like to communicate|l','k_small|Small things that matter to me|l','k_do|Things I want us to do|l','k_rem|Things to remember|l']],
+];
+const PDEF={};PCAT.forEach(c=>c[3].forEach(s=>{const [key,label,type,fl]=s.split('|');PDEF[key]={key,label,type,multi:(fl||'').includes('m'),sens:(fl||'').includes('s'),cat:c[0]}}));
+const PHL=['cuisine','food','color','movie','place','hobby','flower','dream','love','comfort','birthday'];
+const PPROMPTS=['birthday','comfort','color','cuisine','movie','place','hobby','dream','flower','happy'];
+const PDISC=[['cuisine','likes'],['food','likes'],['hobby','likes'],['movie','likes'],['place','likes'],['dream','wants to visit'],['want','wants to visit'],['bucket','wants to visit']];
+const pini=()=>{S.profile=S.profile||[];S.pmem=S.pmem||[];S.pnotes=S.pnotes||[];S.pstars=S.pstars||{};S.pset=S.pset||{paused:false,dis:{},pts:0,datesOff:false}};
+const pShared=()=>{pini();return (isConn()&&!S.pset.paused)?S.profile.filter(f=>f.share):[]};
+const pwire=f=>({id:f.id,cat:f.cat,key:f.key,title:f.title||'',type:PDEF[f.key].type,value:f.value,note:f.note||'',upd:f.upd});
+function adoptP(d){
+  pini();if(!d||!d.id||!PDEF[d.key]||typeof d.value!=='string')return;
+  const def=PDEF[d.key],i=S.pmem.findIndex(x=>x.id===d.id),rev=d._rev||0;
+  if(i>=0&&rev<=(S.pmem[i]._rev||0))return;
+  if(i<0&&S.pmem.length>=300)return;
+  const rec={id:String(d.id).slice(0,40),cat:def.cat,key:d.key,title:String(d.title||'').slice(0,60),type:def.type,value:d.value.slice(0,2000),note:String(d.note||'').slice(0,200),upd:+d.upd||Date.now(),_rev:rev,got:i>=0?(S.pmem[i].got||Date.now()):Date.now()};
+  if(def.type==='d'&&!/^\d{4}-\d{2}-\d{2}$/.test(rec.value))return;
+  if(i>=0)S.pmem[i]=rec;else S.pmem.push(rec);
+}
+const pClearPartner=()=>{pini();S.pmem=[];S.pstars={};S.profile.forEach(f=>{f.share=false})};
+/* dates */
+const isLeap=y=>(y%4===0&&y%100!==0)||y%400===0;
+function nextOcc(v){const [y0,m,d]=v.split('-').map(Number);const y=new Date(TODAY).getFullYear();
+  const mk=yy=>new Date(yy,m-1,(m===2&&d===29&&!isLeap(yy))?28:d).getTime();let t=mk(y);if(t<TODAY)t=mk(y+1);return t}
+const fmtDS=v=>{const [y,m,d]=v.split('-').map(Number);return d+' '+MO[m-1]+(y>1900?' '+y:'')};
+const inDays=t=>{const n=Math.round((t-TODAY)/DAY);return n===0?'today':n===1?'tomorrow':'in '+n+' days'};
+function pDates(){
+  pini();const out=[],p=nm(PID());
+  for(const f of S.profile){const d=PDEF[f.key];if(d.type!=='d'||f.key==='birthday'||!/^\d{4}-\d{2}-\d{2}$/.test(f.value))continue;
+    out.push({id:f.id,who:'me',key:f.key,label:f.title||d.label,next:nextOcc(f.value),text:f.title||d.label,sens:d.sens})}
+  if(isConn())for(const f of S.pmem){const d=PDEF[f.key];if(!d||d.type!=='d'||!/^\d{4}-\d{2}-\d{2}$/.test(f.value))continue;
+    const lab=f.title||d.label;out.push({id:f.id,who:'them',key:f.key,label:lab,next:nextOcc(f.value),text:f.key==='birthday'?p+"'s birthday":lab,sens:d.sens})}
+  return out.sort((a,b)=>a.next-b.next);
+}
+function pUpcoming(){return pDates().filter(x=>{const n=Math.round((x.next-TODAY)/DAY);return n>=0&&n<=14&&!(S.pset.dis['ud:'+x.id+':'+dk(x.next)])})}
+/* discovery: only items both people chose to share */
+function pInCommon(){
+  pini();if(!isConn())return null;const mine=pShared(),p=nm(PID());
+  const toks=s=>String(s).toLowerCase().split(/[,;\n]+/).map(x=>x.trim()).filter(x=>x.length>2);
+  for(const [k,verb] of PDISC){const a=mine.find(f=>f.key===k),b=S.pmem.find(f=>f.key===k);if(!a||!b)continue;
+    const tb=toks(b.value);const hit=toks(a.value).find(t=>tb.includes(t));
+    if(hit&&!S.pset.dis['dc:'+hit])return {tok:hit,text:`You both ${verb==='likes'?'like':'want to visit'} ${hit.replace(/^./,c=>c.toUpperCase())}.`}}
+  return null;
+}
+function pNextPrompt(){
+  pini();if(!isConn()||TODAY<(S.pset.pts||0))return null;
+  const k=PPROMPTS.find(k=>!S.profile.some(f=>f.key===k)&&!S.pset.dis['pp:'+k]);return k||null;
+}
+function pHintHTML(title){
+  if(!isConn()||!/dinner|lunch|breakfast|brunch|restaurant|date|coffee|cook|eat/i.test(title||''))return '';
+  pini();const p=nm(PID()),g=k=>{const f=S.pmem.find(x=>x.key===k);return f?f.value.replace(/\n/g,', '):''};
+  const bits=[];if(g('cuisine'))bits.push('likes '+g('cuisine'));if(g('restaurant'))bits.push('favourite place: '+g('restaurant'));if(g('dislike'))bits.push('dislikes '+g('dislike'));if(g('spice'))bits.push('spice: '+g('spice'));
+  const care=g('cannot');if(!bits.length&&!care)return '';
+  return `<div class="hint them">${esc(p)} ${esc(bits.join(' · '))}${care?`<div style="margin-top:4px"><b>Careful:</b> cannot eat ${esc(care)}</div>`:''}</div>`;
+}
+function profCards(){
+  pini();if(!isConn())return '';const p=nm(PID());let h='';
+  const n=S.pmem.length;
+  h+=`<button class="card" data-a="go" data-v="pmem" style="display:flex;gap:12px;align-items:center;width:100%;text-align:left;margin-top:8px"><span class="rico" style="background:var(--them-soft)">${ic('user')}</span><span class="sl" style="flex:1"><div style="font-weight:650">Know ${esc(p)} better</div><div class="s2" style="font-size:13px;color:var(--ink-2)">${n?n+' thing'+(n>1?'s':'')+' '+esc(p)+' shared with you':esc(p)+' has not shared anything yet. That is fine.'}</div></span><span class="chev">${ic('next',18)}</span></button>`;
+  if(!S.pset.datesOff)for(const u of pUpcoming().slice(0,2)){
+    const gifts=(u.who==='them'&&(u.key==='birthday'||u.key==='anniversary'))?S.pmem.filter(f=>f.key==='love'||f.key==='wish').map(f=>f.value.replace(/\n/g,', ')).join(', '):'';
+    const avoid=(u.who==='them'&&gifts)?(S.pmem.find(f=>f.key==='notwant')||{}).value:'';
+    h+=`<div class="card" style="display:grid;gap:8px;margin-top:8px"><div style="font-weight:650">${esc(u.text)} is ${inDays(u.next)}</div>${gifts?`<div class="s2" style="font-size:13.5px;color:var(--ink-2)">Gift ideas ${esc(p)} shared: ${esc(gifts.slice(0,140))}${avoid?`<br>Please avoid: ${esc(avoid.replace(/\n/g,', ').slice(0,100))}`:''}</div>`:''}<div class="btns"><button class="btn sec sm" data-a="pdate" data-id="${u.id}">Add an event</button>${gifts?`<button class="btn sec sm" data-a="gop" data-v="pmemcat" data-id="gifts">See ideas</button>`:''}<button class="btn sec sm" data-a="pdatedis" data-id="${u.id}" data-k="${dk(u.next)}">Not now</button></div></div>`}
+  const dc=pInCommon();
+  if(dc)h+=`<div class="card" style="display:flex;gap:10px;align-items:center;margin-top:8px"><span style="flex:1"><div style="font-weight:650">${esc(dc.text)}</div><div class="s2" style="font-size:13px;color:var(--ink-2)">Something you have in common.</div></span><button class="link" data-a="pdiscdis" data-k="${esc(dc.tok)}">Got it</button></div>`;
+  const pk=pNextPrompt();
+  if(pk)h+=`<div class="card" style="display:grid;gap:8px;margin-top:8px"><div><div style="font-weight:650">Tell ${esc(p)} one small thing</div><div class="s2" style="font-size:13.5px;color:var(--ink-2)">${esc(PDEF[pk].label)}. Only if you want to. You choose whether ${esc(p)} sees it.</div></div><div class="btns"><button class="btn sm" data-a="pfnew" data-key="${pk}">Add</button><button class="btn sec sm" data-a="ppnot">Not now</button><button class="btn sec sm" data-a="ppnever" data-k="${pk}">Don't ask again</button></div></div>`;
+  return h;
+}
+/* rows */
+const pChip=f=>(f.share&&isConn()&&!S.pset.paused)?`<span class="chip c them">${esc(nm(PID()))} can see</span>`:`<span class="chip c you">${ic('lock',11)}Only me</span>`;
+const pShort=(f,n=48)=>{const t=PDEF[f.key].type==='d'?fmtDS(f.value):f.value.replace(/\n/g,', ');return t.length>n?t.slice(0,n-1)+'…':t};
+const pCatOf=id=>PCAT.find(c=>c[0]===id);
+SCR.myprofile=()=>{pini();const p=nm(PID()),conn=isConn();
+  const pend=PPROMPTS.filter(k=>!S.profile.some(f=>f.key===k)).slice(0,6);
+  return `${bar('My Profile')}
+  <div class="hint you" style="display:flex;gap:10px"><span>${ic('shield',20)}</span><span><b>Only you can see this</b> until you choose to share a detail${conn?' with '+esc(p):''}. Add as little or as much as you like. Nothing here is required.</span></div>
+  ${conn?`<div class="card" style="display:flex;gap:12px;align-items:center;margin-top:12px"><span style="flex:1"><div style="font-weight:650">Pause all sharing</div><div class="s2" style="font-size:13px;color:var(--ink-2)">${S.pset.paused?esc(p)+' sees nothing from your profile right now.':'Hide everything from '+esc(p)+' at once. You can turn it back on any time.'}</div></span><button class="tog" role="switch" aria-checked="${!!S.pset.paused}" aria-label="Pause all sharing" data-a="ppause"></button></div>`:`<div class="hint" style="margin-top:12px">Sharing starts when a partner connects. Until then everything stays Only me.</div>`}
+  ${pend.length?`<div class="sec-h"><h2 class="sec">Add something small</h2></div><div class="chipsel">${pend.map(k=>`<button data-a="pfnew" data-key="${k}">${esc(PDEF[k].label)}</button>`).join('')}</div>`:''}
+  <div class="sec-h"><h2 class="sec">Sections</h2></div>
+  <div class="list">${PCAT.map(c=>{const a=S.profile.filter(f=>f.cat===c[0]),s=a.filter(f=>f.share).length;
+    return `<button class="pr" data-a="gop" data-v="profcat" data-id="${c[0]}"><span class="rico" style="background:var(--you-soft)">${c[2]}</span><span class="sl"><div class="s1">${esc(c[1])}</div><div class="s2">${a.length?a.length+' added'+(conn?' · '+s+' shared':''):'Nothing yet'}</div></span><span class="chev">${ic('next',18)}</span></button>`}).join('')}</div>
+  ${conn?`<button class="btn them" style="margin-top:12px" data-a="go" data-v="psee">${ic('eye',20)}See what ${esc(p)} sees</button>`:''}
+  <div class="sec-h"><h2 class="sec">Reminders</h2></div>
+  <div class="list"><div class="set"><span class="sl"><div class="s1">Important-date reminders</div><div class="s2">A nudge 3 days before and on the day.</div></span><button class="tog" role="switch" aria-checked="${!S.pset.datesOff}" aria-label="Important-date reminders" data-a="pdateson"></button></div></div>
+  <p class="hint" style="margin-top:12px">Nothing here reads your messages, contacts or location. Notes you keep about ${conn?esc(p):'your partner'} stay on this phone.</p>`};
+SCR.profcat=r=>{pini();const c=pCatOf(r.id);if(!c)return bar('Profile');const conn=isConn(),p=nm(PID());
+  const rows=[];
+  for(const s of c[3]){const key=s.split('|')[0],d=PDEF[key],recs=S.profile.filter(f=>f.key===key);
+    for(const f of recs)rows.push(`<button class="pr" data-a="pfedit" data-id="${f.id}"><span class="sl"><div class="s1">${esc(f.title||d.label)}</div><div class="s2">${esc(pShort(f))}</div></span>${pChip(f)}</button>`);
+    if(!recs.length||d.multi)rows.push(`<button class="pr" data-a="pfnew" data-key="${key}"><span class="rico" style="background:var(--you-soft);color:var(--you)">${ic('plus',18)}</span><span class="sl"><div class="s1" style="font-weight:500;color:var(--ink-2)">${recs.length?'Add another: ':''}${esc(d.label)}</div></span></button>`)}
+  const inCat=S.profile.filter(f=>f.cat===c[0]&&!PDEF[f.key].sens);const allOn=inCat.length&&inCat.every(f=>f.share);
+  return `${bar(esc(c[1]))}
+  ${conn&&inCat.length?`<div class="card" style="display:flex;gap:12px;align-items:center;margin-bottom:12px"><span style="flex:1"><div style="font-weight:650">${allOn?'Sharing this section':'Share this section'}</div><div class="s2" style="font-size:13px;color:var(--ink-2)">Sensitive items stay private unless you turn them on one by one.</div></span><button class="tog" role="switch" aria-checked="${!!allOn}" aria-label="Share this section" data-a="pcatshare" data-id="${c[0]}" data-v="${allOn?0:1}"></button></div>`:''}
+  <div class="list">${rows.join('')}</div>`};
+SH.pfield=()=>{const s=ui.sheet,d=PDEF[s.key],conn=isConn(),p=nm(PID());
+  const inp=d.type==='d'?`<input type="date" id="pf-v" data-in="pfv" value="${esc(s.val)}">`:d.type==='l'?`<textarea id="pf-v" data-in="pfv" rows="4" maxlength="2000" placeholder="Write it your way">${esc(s.val)}</textarea>`:`<input type="text" id="pf-v" data-in="pfv" maxlength="200" value="${esc(s.val)}" placeholder="Type here" autocomplete="off">`;
+  const titled=d.multi&&(d.type==='d'||d.key==='story');
+  return `<div class="scrim" data-a="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(d.label)}"><div class="grab"></div><h2>${esc(d.multi&&!titled?d.label:(s.title||d.label))}</h2>
+  ${titled?`<label class="field"><span>Title</span><input type="text" data-in="pft" maxlength="60" value="${esc(s.title)}" placeholder="${d.type==='d'?"e.g. Mum's birthday":'e.g. The summer in Madeira'}" autocomplete="off"></label>`:''}
+  <label class="field"><span>${esc(titled?(d.type==='d'?'Date':'Story'):d.label)}</span>${inp}</label>
+  <label class="field"><span>Note (optional)</span><input type="text" data-in="pfn" maxlength="200" value="${esc(s.note)}" placeholder="Anything to add?" autocomplete="off"></label>
+  ${d.sens?`<div class="hint">This one is sensitive. It stays private unless you turn sharing on for it.</div>`:''}
+  ${conn?`<div class="set" style="padding:0"><span class="sl"><div class="s1">Share with ${esc(p)}</div><div class="s2">${s.share?esc(p)+' will see this.':'Only you can see this.'}</div></span><button class="tog" role="switch" aria-checked="${!!s.share}" aria-label="Share with ${esc(p)}" data-a="pfshare"></button></div>`:`<div class="hint you" style="display:flex;gap:8px;align-items:center">${ic('lock',16)}<span>Only you. You can choose to share this after you connect with a partner.</span></div>`}
+  <div class="err" id="pf-err" role="alert"></div>
+  <button class="btn" data-a="pfsave">Save</button>${s.id?`<button class="btn bad" data-a="pfdel">${ic('trash',20)}Remove</button>`:''}<button class="btn sec" data-a="close">Cancel</button></div>`};
+SCR.psee=()=>{pini();const p=nm(PID()),sh=pShared();
+  return `${bar('What '+esc(p)+' sees')}
+  <p class="sub" style="margin:0 0 12px">This is exactly what ${esc(p)} can see of your profile. Tap Stop sharing on anything.</p>
+  ${S.pset.paused?`<div class="hint them">Sharing is paused, so ${esc(p)} sees nothing.</div>`:''}
+  ${!sh.length&&!S.pset.paused?`<div class="hint">You haven't shared anything yet. Everything is Only you.</div>`:''}
+  ${PCAT.map(c=>{const a=sh.filter(f=>f.cat===c[0]);return a.length?`<div class="sec-h"><h2 class="sec">${esc(c[1])}</h2></div><div class="list">${a.map(f=>`<div class="pr"><span class="sl"><div class="s1">${esc(f.title||PDEF[f.key].label)}</div><div class="s2">${esc(pShort(f,80))}</div></span><button class="link" data-a="pfunshare" data-id="${f.id}">Stop sharing</button></div>`).join('')}</div>`:''}).join('')}`};
+/* Partner Memory */
+const pQuick=f=>{const v=f.value.replace(/\n/g,', ');
+  if(f.key==='comfort')return `Sending you ${v} tonight`;
+  if(f.key==='drink')return `Want me to bring you a ${v}?`;
+  if((f.key==='happy'||f.key==='k_happy')&&/call/i.test(v))return 'Thinking of you. Can I call you later?';
+  return ''};
+const pItem=(f,actions=true)=>{const d=PDEF[f.key]||{label:f.key,type:'t'},star=!!S.pstars[f.id],p=nm(PID()),q=actions?pQuick(f):'';
+  const val=d.type==='d'?esc(fmtDS(f.value))+' · '+inDays(nextOcc(f.value)):esc(f.value);
+  return `<div class="card" style="display:grid;gap:8px"><div style="display:flex;gap:8px;align-items:flex-start"><div style="flex:1;min-width:0"><div class="lbl">${esc(f.title||d.label)}</div><div style="font-weight:600;white-space:pre-wrap;overflow-wrap:anywhere">${val}</div>${f.note?`<div class="s2" style="font-size:13px;color:var(--ink-2)">${esc(f.note)}</div>`:''}<div class="s2" style="font-size:12px;color:var(--ink-2)">${esc(p)} shared · ${dayLabel(f.got||f.upd)}</div></div>${actions?`<button class="ibtn" data-a="pstar" data-id="${f.id}" aria-pressed="${star}" aria-label="${star?'Remove star':'Star this'}">${star?'★':'☆'}</button>`:''}</div>
+  ${actions?`<div class="btns"><button class="btn sec sm" data-a="pnoteon" data-ref="${f.id}">Add my note</button>${q?`<button class="btn them sm" data-a="pquick" data-text="${esc(q)}">${ic('send',16)}Send a message</button>`:''}</div>`:''}</div>`};
+SCR.pmem=()=>{pini();const p=nm(PID()),q=(ui.pmq||'').trim().toLowerCase(),items=S.pmem;
+  if(!isConn()&&!items.length)return `${bar('Partner Memory')}<div class="hint">Partner Memory starts when a partner connects and chooses to share something. Nothing is shown until then.</div>`;
+  const notes=S.pnotes;
+  const search=`<input type="search" id="pmq" data-in="pmq" value="${esc(ui.pmq||'')}" placeholder="Search what ${esc(p)} shared" aria-label="Search" autocomplete="off" style="margin-bottom:12px">`;
+  if(q){const hit=items.filter(f=>((f.title||PDEF[f.key].label)+' '+f.value+' '+f.note).toLowerCase().includes(q)),nh=notes.filter(n=>(n.text+' '+(n.refLabel||'')).toLowerCase().includes(q));
+    return `${bar('Partner Memory')}${search}${hit.length?hit.map(f=>pItem(f)).join('<div style="height:8px"></div>'):''}${nh.length?`<div class="sec-h"><h2 class="sec">My notes</h2></div><div class="list">${nh.map(pNoteRow).join('')}</div>`:''}${!hit.length&&!nh.length?`<div class="hint">Nothing found for “${esc(ui.pmq)}”.</div>`:''}`}
+  const hl=PHL.map(k=>items.find(f=>f.key===k)).filter(Boolean).slice(0,8);
+  const star=items.filter(f=>S.pstars[f.id]);
+  return `${bar('Partner Memory')}
+  <div style="display:flex;align-items:center;gap:14px;padding:2px 0 12px"><span class="them">${av(PID(),56)}</span><div><h1 class="title" style="font-size:24px;margin:0">${esc(p)}</h1><div class="sub" style="margin:2px 0 0">${items.length?items.length+' thing'+(items.length>1?'s':'')+' shared with you':'Nothing shared yet'}</div></div></div>
+  ${search}
+  ${!items.length?`<div class="hint them">${esc(p)} hasn't shared anything yet. That's okay, it's their choice. You can keep your own private notes below.</div>`:''}
+  ${hl.length?`<div class="sec-h"><h2 class="sec">Highlights</h2></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${hl.map(f=>`<div class="card" style="padding:12px"><div class="lbl">${esc(f.title||PDEF[f.key].label)}</div><div style="font-weight:650;overflow-wrap:anywhere">${esc(pShort(f,34))}</div></div>`).join('')}</div>`:''}
+  ${items.some(f=>f.cat==='know')?`<button class="card" data-a="gop" data-v="pmemcat" data-id="know" style="display:flex;gap:12px;align-items:center;width:100%;text-align:left;margin-top:12px"><span style="font-size:24px">💌</span><span style="flex:1"><div style="font-weight:650">Things ${esc(p)} wants you to know</div><div class="s2" style="font-size:13px;color:var(--ink-2)">${items.filter(f=>f.cat==='know').length} notes, in their words</div></span><span class="chev">${ic('next',18)}</span></button>`:''}
+  ${items.length?`<div class="sec-h"><h2 class="sec">Sections</h2></div><div class="list">${PCAT.filter(c=>c[0]!=='know').map(c=>{const n=items.filter(f=>f.cat===c[0]).length;return n?`<button class="pr" data-a="gop" data-v="pmemcat" data-id="${c[0]}"><span class="rico" style="background:var(--them-soft)">${c[2]}</span><span class="sl"><div class="s1">${esc(c[1])}</div><div class="s2">${n} shared</div></span><span class="chev">${ic('next',18)}</span></button>`:''}).join('')}</div>`:''}
+  ${star.length?`<div class="sec-h"><h2 class="sec">Starred</h2></div>${star.map(f=>pItem(f)).join('<div style="height:8px"></div>')}`:''}
+  <div class="sec-h"><h2 class="sec">My notes about ${esc(p)}</h2><button class="link" data-a="pnoteon">Add</button></div>
+  <p class="s2" style="font-size:12.5px;color:var(--ink-2);margin:-4px 0 8px">${ic('lock',12)} Only on this phone. ${esc(p)} never sees these.</p>
+  ${notes.length?`<div class="list">${notes.map(pNoteRow).join('')}</div>`:`<div class="hint">Jot down small things you notice, like “loved the tiramisu” or “gift idea: the blue scarf”.</div>`}`};
+const pNoteRow=n=>`<button class="pr" data-a="pnoteedit" data-id="${n.id}"><span class="sl"><div class="s1" style="font-weight:500;white-space:pre-wrap;overflow-wrap:anywhere">${esc(n.text.length>120?n.text.slice(0,119)+'…':n.text)}</div><div class="s2">${n.tag?esc(n.tag)+' · ':''}${n.refLabel?'About '+esc(n.refLabel)+' · ':''}${dayLabel(n.ts)}</div></span></button>`;
+SCR.pmemcat=r=>{pini();const c=pCatOf(r.id);if(!c)return bar('Partner Memory');const p=nm(PID()),a=S.pmem.filter(f=>f.cat===c[0]);
+  return `${bar(c[0]==='know'?'Things '+esc(p)+' wants you to know':esc(c[1]))}
+  ${a.length?a.map(f=>pItem(f)).join('<div style="height:8px"></div>'):`<div class="hint">${esc(p)} hasn't shared anything in this section yet.</div>`}`};
+SH.pnote=()=>{const s=ui.sheet,p=nm(PID());
+  return `<div class="scrim" data-a="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="My note"><div class="grab"></div><h2>My note about ${esc(p)}</h2><p class="sub2">Only on this phone. ${esc(p)} never sees it.</p>
+  ${s.refLabel?`<div class="chip">About ${esc(s.refLabel)}</div>`:''}
+  <textarea id="pn-t" data-in="pnt" rows="4" maxlength="1000" placeholder="e.g. Loved the tiramisu">${esc(s.text)}</textarea>
+  <div class="chipsel">${['Gift idea','Date idea','Remember'].map(t=>`<button data-a="pntag" data-v="${t}" aria-pressed="${s.tag===t}">${t}</button>`).join('')}</div>
+  <div class="err" id="pn-err" role="alert"></div>
+  <button class="btn" data-a="pnotesave">Save</button>${s.id?`<button class="btn bad" data-a="pnotedel">${ic('trash',20)}Delete</button>`:''}<button class="btn sec" data-a="close">Cancel</button></div>`};
+SH.pquick=()=>{const s=ui.sheet,p=nm(PID());
+  return `<div class="scrim" data-a="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Send a message"><div class="grab"></div><h2>Send ${esc(p)} a message?</h2><p class="sub2">Edit it if you like. It is only sent when you tap Send.</p>
+  <textarea id="pq-t" data-in="pqt" rows="3" maxlength="200">${esc(s.text)}</textarea>
+  <button class="btn them" data-a="pqsend">${ic('send',20)}Send</button><button class="btn sec" data-a="close">Not now</button></div>`};
+/* actions */
+Object.assign(INP,{pfv:e=>{ui.sheet.val=e.value},pft:e=>{ui.sheet.title=e.value},pfn:e=>{ui.sheet.note=e.value},pnt:e=>{ui.sheet.text=e.value},pqt:e=>{ui.sheet.text=e.value},pmq:e=>{ui.pmq=e.value;render()}});
+{const _t=INP.title;INP.title=e=>{_t(e);const h=$('#phint');if(h)h.innerHTML=pHintHTML(e.value)}}
+const _ch=createHTML;
+createHTML=function(){const h=_ch();if(!ui.sheet||!ui.sheet.d)return h;const t=ui.sheet.d.title||'';return h.replace('<div class="err" id="f-err"',`<div id="phint">${pHintHTML(t)}</div><div class="err" id="f-err"`)};
+SH.create=createHTML;
+const pfocus=()=>setTimeout(()=>{const f=$('#pf-v');if(f)f.focus()},60);
+Object.assign(A,{
+  gop:e=>go(e.dataset.v,{id:e.dataset.id}),
+  pfnew:e=>{pini();const key=e.dataset.key,d=PDEF[key];if(!d)return;ui.sheet={t:'pfield',cat:d.cat,key,id:null,title:'',val:'',note:'',share:false};render();pfocus()},
+  pfedit:e=>{pini();const f=S.profile.find(x=>x.id===e.dataset.id);if(!f)return;ui.sheet={t:'pfield',cat:f.cat,key:f.key,id:f.id,title:f.title||'',val:f.value,note:f.note||'',share:!!f.share};render()},
+  pfshare:()=>{ui.sheet.share=!ui.sheet.share;render()},
+  pfsave:()=>{pini();const s=ui.sheet,d=PDEF[s.key],err=m=>{const x=$('#pf-err');if(x)x.textContent=m};
+    const v=(s.val||'').trim();if(!v)return err('Add something first, or tap Cancel.');
+    if(d.type==='d'&&!/^\d{4}-\d{2}-\d{2}$/.test(v))return err('Choose a date.');
+    const titled=d.multi&&(d.type==='d'||d.key==='story');if(titled&&!(s.title||'').trim())return err('Give it a short title.');
+    let f=s.id&&S.profile.find(x=>x.id===s.id);
+    if(!f){if(S.profile.length>=200)return err('That is a lot already. Remove something first.');f={id:uid('p'),cat:d.cat,key:s.key};S.profile.push(f)}
+    Object.assign(f,{title:titled?s.title.trim().slice(0,60):'',value:v.slice(0,2000),note:(s.note||'').trim().slice(0,200),share:isConn()?!!s.share:false,upd:Date.now()});
+    ui.sheet=null;commit();toast(f.share?'Saved. '+nm(PID())+' can see it.':'Saved. Only you can see it.')},
+  pfdel:()=>{pini();const i=S.profile.findIndex(x=>x.id===ui.sheet.id);if(i<0)return;const f=S.profile[i];S.profile.splice(i,1);ui.sheet=null;commit();toast('Removed',()=>{S.profile.splice(i,0,f);commit()})},
+  pfunshare:e=>{pini();const f=S.profile.find(x=>x.id===e.dataset.id);if(f){f.share=false;commit();toast('No longer shared')}},
+  pcatshare:e=>{pini();const on=e.dataset.v==='1';S.profile.forEach(f=>{if(f.cat===e.dataset.id&&!PDEF[f.key].sens)f.share=on});commit();toast(on?'Shared with '+nm(PID()):'Stopped sharing this section')},
+  ppause:()=>{pini();S.pset.paused=!S.pset.paused;commit();toast(S.pset.paused?'Paused. '+nm(PID())+' sees nothing from your profile.':'Sharing is back on')},
+  pdateson:()=>{pini();S.pset.datesOff=!S.pset.datesOff;commit()},
+  ppnot:()=>{pini();S.pset.pts=TODAY+7*DAY;commit()},
+  ppnever:e=>{pini();S.pset.dis['pp:'+e.dataset.k]=1;commit()},
+  pdatedis:e=>{pini();S.pset.dis['ud:'+e.dataset.id+':'+e.dataset.k]=1;commit()},
+  pdiscdis:e=>{pini();S.pset.dis['dc:'+e.dataset.k]=1;commit()},
+  pdate:e=>{const u=pDates().find(x=>x.id===e.dataset.id);if(!u)return;openCreate('event');ui.sheet.d.title=u.text;ui.sheet.d.date=dk(u.next);ui.sheet.d.time='19:00';render()},
+  pstar:e=>{pini();const id=e.dataset.id;if(S.pstars[id])delete S.pstars[id];else S.pstars[id]=1;commit()},
+  pnoteon:e=>{pini();const ref=e.dataset.ref,f=ref&&S.pmem.find(x=>x.id===ref);ui.sheet={t:'pnote',id:null,text:'',tag:'',ref:ref||'',refLabel:f?(f.title||PDEF[f.key].label):''};render();setTimeout(()=>{const t=$('#pn-t');t&&t.focus()},60)},
+  pnoteedit:e=>{pini();const n=S.pnotes.find(x=>x.id===e.dataset.id);if(!n)return;ui.sheet={t:'pnote',id:n.id,text:n.text,tag:n.tag||'',ref:n.ref||'',refLabel:n.refLabel||''};render()},
+  pntag:e=>{ui.sheet.tag=ui.sheet.tag===e.dataset.v?'':e.dataset.v;render()},
+  pnotesave:()=>{pini();const s=ui.sheet,t=(s.text||'').trim();if(!t){const x=$('#pn-err');if(x)x.textContent='Write a note first.';return}
+    if(s.id){const n=S.pnotes.find(x=>x.id===s.id);if(n)Object.assign(n,{text:t,tag:s.tag})}else S.pnotes.unshift({id:uid('n'),text:t.slice(0,1000),tag:s.tag,ref:s.ref,refLabel:s.refLabel,ts:NOW()});
+    ui.sheet=null;commit();toast('Saved on this phone')},
+  pnotedel:()=>{pini();const i=S.pnotes.findIndex(x=>x.id===ui.sheet.id);if(i<0)return;const n=S.pnotes[i];S.pnotes.splice(i,1);ui.sheet=null;commit();toast('Note deleted',()=>{S.pnotes.splice(i,0,n);commit()})},
+  pquick:e=>{ui.sheet={t:'pquick',text:e.dataset.text||''};render()},
+  pqsend:()=>{const t=(ui.sheet.text||'').trim();ui.sheet=null;if(!t){render();return}sendQuick(t)},
+});
+{const _sg=A.sepgo;A.sepgo=()=>{pClearPartner();_sg()}}
+
 const api={sync,render,setViewer,getViewer:()=>viewer,ui,route:()=>route,S:()=>S};
 APPS.push(api);
 if(hooks.primary)window.__iclock={setClock,resetDay,answer:(u,k,o)=>{answer(u,k,o);commit()},state:()=>S,ui};
