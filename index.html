@@ -978,11 +978,15 @@ SCR.settings=()=>{const s=S.set;return `${bar('Settings')}
   <div class="list"><div class="set"><span class="sl"><div class="s1">24-hour clock</div></span>${tog('h24',s.h24,'24-hour clock')}</div>
   <div class="set"><span class="sl"><div class="s1">Time zone</div></span><span class="chip">${esc(U().tz)}</span></div></div>
   <div class="sec-h"><h2 class="sec">Relationship</h2></div>
-  <div class="list"><button class="pr" data-a="go" data-v="relmode"><span class="sl"><div class="s1">Relationship mode</div><div class="s2">${S.mode==='single'?'Single':'Mingle'}${S.archived?' · 1 archived space':''}</div></span><span class="chev">${ic('next',18)}</span></button></div>
+  <div class="list"><button class="pr" data-a="go" data-v="relmode"><span class="sl"><div class="s1">Relationship mode</div><div class="s2">${S.mode==='single'?'Single':'Mingle'}${S.archived?' · 1 archived space':''}</div></span><span class="chev">${ic('next',18)}</span></button>
+  ${isConn()?`<button class="pr" data-a="go" data-v="sharing"><span class="sl"><div class="s1">Change what I share</div><div class="s2">Choose what ${esc(nm(PID()))} can see</div></span><span class="chev">${ic('next',18)}</span></button>
+  <button class="pr" data-a="sheet" data-v="separate"><span class="sl"><div class="s1" style="color:var(--danger)">Break up with ${esc(nm(PID()))}…</div><div class="s2">Disconnect from each other</div></span><span class="chev">${ic('next',18)}</span></button>`
+  :(S.pstate==='invited'?'':`<button class="pr" data-a="sheet" data-v="invite"><span class="sl"><div class="s1">Add a new partner</div><div class="s2">Connect with a new code</div></span><span class="chev">${ic('next',18)}</span></button>`)}</div>
   <div class="sec-h"><h2 class="sec">Appearance</h2></div>
   <div class="card">${seg('theme',s.theme,[['system','System'],['light','Light'],['dark','Dark']])}</div>
   <div class="sec-h"><h2 class="sec">Account</h2></div>
   <div class="list"><div class="set"><span class="sl"><div class="s1">Email</div></span><span class="chip">${esc(U().contact||'Not set')}</span></div>
+  <div class="set"><button class="sl" data-a="sheet" data-v="logout" style="text-align:left"><div class="s1" style="color:var(--danger)">Log out</div><div class="s2">Disconnects your partner and clears this phone.</div></button></div>
   <div class="set"><button class="sl" data-a="sheet" data-v="reset" style="text-align:left"><div class="s1" style="color:var(--danger)">Restart demo</div><div class="s2">Clears everything and starts onboarding.</div></button></div></div>
   <div class="sec-h"><h2 class="sec">Network</h2></div>
   <div class="list"><div class="set"><span class="sl"><div class="s1">Show offline state</div><div class="s2">Changes still work and sync later.</div></span>${tog('offline',ui.offline,'Offline')}</div></div>`};
@@ -1005,8 +1009,8 @@ SCR.relmode=()=>{const p=nm(PID()),m=S.mode,st=S.pstate;
   else if(m==='mingle'&&st==='none')panel=`<div class="card" style="display:grid;gap:10px"><div style="font-weight:650">No partner yet</div><button class="btn them" data-a="sheet" data-v="invite">${ic('send',20)}Invite Partner</button><button class="btn sec" data-a="tosingle">Switch to Single</button></div>`;
   else if(m==='mingle'&&st==='invited')panel=`<div class="card" style="display:grid;gap:10px"><div style="font-weight:650">Waiting for ${esc(p)}</div><div class="s2" style="font-size:13.5px;color:var(--ink-2)">${S.pair?'Your code: '+fmtCode(S.pair.code)+'. ':''}My Space works fully meanwhile.</div><div class="btns"><button class="btn sec" data-a="resend">Resend</button><button class="btn sec" data-a="cancelinv">Cancel invite</button></div></div>`;
   else if(isConn())panel=`<div class="card" style="display:grid;gap:10px"><div style="display:flex;gap:10px;align-items:center"><span class="avp">${av(V(),36)}${av(PID(),36)}</span><div><div style="font-weight:650">Connected with ${esc(p)}</div><div class="s2" style="font-size:13px;color:var(--ink-2)">Three spaces: yours, ${esc(p)}'s and Our Space</div></div></div></div>
-    <button class="btn bad" style="margin-top:12px" data-a="sheet" data-v="separate">Separate from ${esc(p)}…</button>`;
-  else if(st==='readonly')panel=`<div class="hint them"><b>Our Space is read-only.</b> Both of you can view it. It archives automatically in 30 days.</div><div class="btns" style="margin-top:10px"><button class="btn sec" data-a="exportdata">Export shared data</button><button class="btn sec" data-a="archivenow">Archive now</button></div><button class="btn sec" style="margin-top:8px" data-a="sheet" data-v="invite">Invite ${esc(p)} again</button>`;
+    <button class="btn bad" style="margin-top:12px" data-a="sheet" data-v="separate">Break up with ${esc(p)}…</button>`;
+  else if(st==='readonly')panel=`<div class="hint them"><b>Our Space is read-only.</b> Both of you can view it. It archives automatically in 30 days.</div><div class="btns" style="margin-top:10px"><button class="btn sec" data-a="exportdata">Export shared data</button><button class="btn sec" data-a="archivenow">Archive now</button></div><button class="btn sec" style="margin-top:8px" data-a="sheet" data-v="invite">Add a new partner</button>`;
   return `${bar('Relationship mode')}
   <p class="sub" style="margin:0 0 12px">Single is a complete app on its own. Mingle adds Our Space.</p>
   <div style="display:grid;gap:10px">${card('single','Single','My Space only',`<svg width="56" height="56" viewBox="0 0 100 100" aria-hidden="true"><path d="M78 68A34 34 0 1 1 78 32" fill="none" stroke="var(--you)" stroke-width="8" stroke-linecap="round"/><path d="M48 50L48 28" stroke="var(--you)" stroke-width="9" stroke-linecap="round"/></svg>`)}${card('mingle','Mingle','My Space + Our Space',`<svg width="56" height="56" viewBox="0 0 100 100" aria-hidden="true"><circle cx="38" cy="50" r="24" fill="none" stroke="var(--you)" stroke-width="8"/><circle cx="62" cy="50" r="24" fill="none" stroke="var(--them)" stroke-width="8"/></svg>`)}</div>
@@ -1139,11 +1143,11 @@ SH.invite=()=>{const s=ui.sheet;return `<div class="scrim" data-a="close"></div>
   <div class="card" style="display:grid;gap:10px"><div><b>Create a code</b><div class="s2" style="font-size:13.5px;color:var(--ink-2)">Your partner types it in on their phone.</div></div><button class="btn them" data-a="linkhost">${ic('send',20)}Create a code</button></div>
   <div class="card" style="display:grid;gap:10px"><b>I have a code from my partner</b><div style="display:flex;gap:8px"><input type="text" id="codein" data-in="codein" value="${esc(s.codeIn||'')}" placeholder="K7Q4-XM9P" autocapitalize="characters" autocomplete="off" aria-label="Partner's code" style="letter-spacing:.08em"><button class="btn sm" data-a="linkjoin">Connect</button></div><div class="err" id="codeerr" role="alert">${esc(ui.codeErr||'')}</div></div></div>`};
 SH.separate=()=>{const s=ui.sheet,p=nm(PID());
-  return `<div class="scrim" data-a="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Separate"><div class="grab"></div><h2>Separate from ${esc(p)}?</h2>
-  <div class="hint you">Your My Space stays yours. ${esc(p)}'s My Space stays theirs. Nothing shared is deleted right now.</div>
+  return `<div class="scrim" data-a="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Break up"><div class="grab"></div><h2>Break up with ${esc(p)}?</h2>
+  <div class="hint you">You and ${esc(p)} will be disconnected and nothing new is shared. Your My Space stays yours. ${esc(p)}'s stays theirs. Afterwards you can add a new partner.</div>
   <div class="field"><span>What happens to Our Space</span><div class="opts"><button class="opt" aria-pressed="${s.opt==='readonly'}" data-a="sepopt" data-v="readonly"><span style="flex:1;text-align:left"><b>Keep it read-only</b><br><small style="color:var(--ink-2);font-weight:500">You both can view. Nobody edits. Archives in 30 days.</small></span></button><button class="opt" aria-pressed="${s.opt==='archive'}" data-a="sepopt" data-v="archive"><span style="flex:1;text-align:left"><b>Archive it now</b><br><small style="color:var(--ink-2);font-weight:500">Hidden. Recoverable and exportable for 90 days.</small></span></button></div></div>
   <label class="set" style="padding:0"><span class="sl"><div class="s1">Export a copy of shared data first</div><div class="s2">Notes, tasks, events as a file</div></span>${tog('sepexport',s.exp,'Export first')}</label>
-  <button class="btn bad" data-a="sepgo">Remove ${esc(p)}</button><button class="btn sec" data-a="close">Keep connected</button></div>`};
+  <button class="btn bad" data-a="sepgo">Break up and disconnect</button><button class="btn sec" data-a="close">Keep connected</button></div>`};
 SH.vis=()=>{return ''};
 SH.snooze=()=>{const {id,k}=ui.sheet,now=NOW();const opt=(l,s,v)=>`<button class="opt" data-a="snzdo" data-v="${v}" data-id="${id}" data-k="${k}">${l}<small>${s}</small></button>`;
   return `<div class="scrim" data-a="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Snooze"><div class="grab"></div><h2>Snooze until…</h2><div class="opts">${opt('In 10 minutes',fmtT(now+6e5),'10')}${opt('In 1 hour',fmtT(now+36e5),'60')}${S.clock<18*60?opt('This evening','6:00 PM','eve'):''}${opt('Tomorrow morning','9:00 AM','tom')}<button class="opt" data-a="rsc" data-id="${id}" data-k="${k}">Pick a date and time<span style="margin-left:auto">${ic('next',18)}</span></button></div></div>`};
@@ -1167,6 +1171,7 @@ SH.disconnect=()=>`<div class="scrim" data-a="close"></div><div class="sheet" ro
   <div class="hint">Sharing stops right away for both of you. Your private notes, reminders and routine stay yours. Shared notes and events stay as copies for each of you. ${esc(nm(PID()))} sees a neutral message that you left the space.</div>
   <div class="hint you">If you feel unsafe or pressured to share, you can leave at any time. Safety resources are in Settings.</div>
   <button class="btn bad" data-a="disc">Disconnect</button><button class="btn sec" data-a="close">Keep connected</button></div>`;
+SH.logout=()=>`<div class="scrim" data-a="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Log out"><div class="grab"></div><h2>Log out?</h2><p class="sub2">${S.pair?'You will be disconnected from '+esc(nm(PID()))+'. ':''}Everything on this phone is cleared, because your data only lives here. You can set up again any time.</p><button class="btn bad" data-a="logoutgo">Log out</button><button class="btn sec" data-a="close">Cancel</button></div>`;
 SH.reset=()=>`<div class="scrim" data-a="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Restart"><div class="grab"></div><h2>Restart the demo?</h2><p class="sub2">This clears everything you changed and starts onboarding again.</p><button class="btn bad" data-a="resetgo">Restart</button><button class="btn sec" data-a="close">Cancel</button></div>`;
 
 /* ---------- demo panel ---------- */
@@ -1378,7 +1383,7 @@ const A={
   obskip:()=>A.obnext(),
   obconnect:()=>{applyPreset();S.mode='mingle';S.pstate='connected';S.onboarded=true;route=[{n:'us'}];commit();toast('Our Space is ready for '+MN()+' & '+PN())},
   scenario:e=>{const v=e.dataset.v;S.onboarded=true;viewer=viewer0;if(v==='single'){S.mode='single';S.pstate='none'}else if(v==='wait'){S.mode='mingle';S.pstate='invited'}else{S.mode='mingle';S.pstate='connected'}route=[{n:'today'}];ui.banner=null;ui.sheet=null;commit()},
-  sheet:e=>{const v=e.dataset.v;if(v==='invite')ui.sheet={t:'invite',m:'phone',c:'',n:(S.users.sam.name==='Partner'?'':S.users.sam.name)};else if(v==='separate')ui.sheet={t:'separate',opt:'readonly',exp:true};else ui.sheet={t:v};render()},
+  sheet:e=>{const v=e.dataset.v;if(v==='invite')ui.sheet={t:'invite',m:'phone',c:'',n:(S.users.sam.name==='Partner'?'':S.users.sam.name)};else if(v==='separate')ui.sheet={t:'separate',opt:'archive',exp:false};else ui.sheet={t:v};render()},
   invm:e=>{ui.sheet.m=e.dataset.v;ui.sheet.c='';render()},
   invsend:()=>{const s=ui.sheet;S.users.sam.name=(s.n||'').trim()||'Partner';S.mode='mingle';S.pstate='invited';S.pinfo={method:s.m==='user'?'username':s.m,contact:s.c};ui.sheet=null;route=[{n:'us'}];commit();toast('Partner added. My Space keeps working while you wait.')},
   resend:()=>toast('Invite sent again'),
@@ -1673,6 +1678,7 @@ Object.assign(A,{
   enablepush:()=>{enablePush()},
   testpush:async()=>{try{await ensureAccount();const j=await srv('test',authB());toast(j.hasSub?(j.ok?'Test sent. It should appear in a few seconds.':'The phone did not accept it. Turn notifications off and on again.'):'Turn on notifications first')}catch(e){toast("Couldn't reach the server")}},
 });
+A.logoutgo=()=>{if(S.pair&&S.acct){srv('leave',authB()).catch(()=>{})}try{localStorage.removeItem('iclockyou-test-v1')}catch(x){}S=REAL?realSeed():seed();lastJson=null;S.onboarded=false;route=[{n:'welcome'}];ui.sheet=null;ui.banner=null;ui.onb.mode=null;ui.onb.step=0;ui.onb.name='';commit();toast('Logged out')};
 const _sepgo=A.sepgo;A.sepgo=()=>{if(S.pair&&S.acct){srv('leave',authB()).catch(()=>{});S.pair=null}_sepgo()};
 Object.assign(INP,{codein:e=>{const v=e.value.toUpperCase();if(ui.sheet&&ui.sheet.t==='invite')ui.sheet.codeIn=v;else ui.onb.codeIn=v}});
 if(REAL){
