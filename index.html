@@ -1078,7 +1078,7 @@ SCR.routineSetup=()=>`<div class="flow">${flowTop(1)}<div><h1>Your daily rhythm<
 SCR.invite=()=>`<div class="flow">${flowTop(1)}<div><h1>Who do you want to Mingle with?</h1><p class="lead">Connect with a code. You can keep using My Space meanwhile.</p></div>
   <div class="card" style="display:grid;gap:10px"><div><b>Create a code</b><div class="s2" style="font-size:13.5px;color:var(--ink-2)">You get a code. Your partner types it in on their phone.</div></div><button class="btn them" data-a="linkhost">${ic('send',20)}Create a code</button></div>
   <div class="card" style="display:grid;gap:10px"><div><b>I have a code from my partner</b></div><div style="display:flex;gap:8px"><input type="text" id="codein" data-in="codein" value="${esc(ui.onb.codeIn||'')}" placeholder="K7Q4-XM9P" autocapitalize="characters" autocomplete="off" aria-label="Partner's code" style="letter-spacing:.08em"><button class="btn sm" data-a="linkjoin">Connect</button></div><div class="err" id="codeerr" role="alert">${esc(ui.onb.codeErr||'')}</div></div>
-  <div style="flex:1"></div><button class="linkbtn" data-a="obskipinv">I'll do this later</button></div>`;
+  <div style="flex:1"></div><button class="linkbtn" data-a="simpartner">${ic('play',16)}No partner to test with? Try a demo partner</button><button class="linkbtn" data-a="obskipinv">I'll do this later</button></div>`;
 SCR.spaces=()=>{const mg=ui.onb.mode==='mingle',inv=S.pstate==='invited';
   return `<div class="flow"><div style="flex:1;display:grid;align-content:center;gap:18px"><div><h1>${mg?'Your spaces are ready':'My Space is ready'}</h1><p class="lead">${mg?'Two spaces, always clearly labelled.':'Everything you need for your day, in one place.'}</p></div>
   <div class="sp you"><span class="spi"><span class="avp">${av('lara',40)}</span></span><span><b>My Space</b><small>Mine. Notes, reminders, alarms, schedule, routine. Private by default.</small></span></div>
@@ -1153,7 +1153,7 @@ function createHTML(){
 SH.create=createHTML;
 SH.invite=()=>{const s=ui.sheet;return `<div class="scrim" data-a="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Connect with a code"><div class="grab"></div><h2>Who do you want to Mingle with?</h2><p class="sub2">Connect with a code. Nothing is shared until you choose, and My Space stays yours.</p>
   <div class="card" style="display:grid;gap:10px"><div><b>Create a code</b><div class="s2" style="font-size:13.5px;color:var(--ink-2)">Your partner types it in on their phone.</div></div><button class="btn them" data-a="linkhost">${ic('send',20)}Create a code</button></div>
-  <div class="card" style="display:grid;gap:10px"><b>I have a code from my partner</b><div style="display:flex;gap:8px"><input type="text" id="codein" data-in="codein" value="${esc(s.codeIn||'')}" placeholder="K7Q4-XM9P" autocapitalize="characters" autocomplete="off" aria-label="Partner's code" style="letter-spacing:.08em"><button class="btn sm" data-a="linkjoin">Connect</button></div><div class="err" id="codeerr" role="alert">${esc(ui.codeErr||'')}</div></div></div>`};
+  <div class="card" style="display:grid;gap:10px"><b>I have a code from my partner</b><div style="display:flex;gap:8px"><input type="text" id="codein" data-in="codein" value="${esc(s.codeIn||'')}" placeholder="K7Q4-XM9P" autocapitalize="characters" autocomplete="off" aria-label="Partner's code" style="letter-spacing:.08em"><button class="btn sm" data-a="linkjoin">Connect</button></div><div class="err" id="codeerr" role="alert">${esc(ui.codeErr||'')}</div></div><button class="linkbtn" style="width:100%" data-a="simpartner">${ic('play',16)}No partner to test with? Try a demo partner</button></div>`};
 SH.separate=()=>{const s=ui.sheet,p=nm(PID());
   return `<div class="scrim" data-a="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Break up"><div class="grab"></div><h2>Break up with ${esc(p)}?</h2>
   <div class="hint you">You and ${esc(p)} will be disconnected and nothing new is shared. Your My Space stays yours. ${esc(p)}'s stays theirs. Afterwards you can add a new partner.</div>
@@ -1691,7 +1691,7 @@ Object.assign(A,{
   linkretry:()=>{pollOnce();toast('Checking…')},
   copycode:()=>{const t=fmtCode(S.pair&&S.pair.code);try{navigator.clipboard.writeText(t).then(()=>toast('Code copied'),()=>toast('Code: '+t))}catch(e){toast('Code: '+t)}},
   sharecode:()=>{const c=fmtCode(S.pair&&S.pair.code),text=`Join me on I Clock You. Open the app, choose Mingle, and enter this code: ${c}`;try{if(navigator.share){navigator.share({title:'I Clock You',text,url:location.href.split('#')[0]}).catch(()=>{})}else{navigator.clipboard.writeText(text);toast('Invite text copied')}}catch(e){toast('Code: '+c)}},
-  simpartner:()=>{S.pair=null;S.users.sam.name=S.users.sam.name==='Partner'?'Alex':S.users.sam.name;A.obgo({dataset:{v:'connected'}})},
+  simpartner:()=>{if(S.pair&&S.acct)srv('leave',authB()).catch(()=>{});S.pair=null;if(!S.users.sam.name||S.users.sam.name==='Partner')S.users.sam.name='Alex';pSeedDemo();ui.sheet=null;A.obgo({dataset:{v:'connected'}})},
   cancelinv:()=>{if(S.acct&&S.pair)srv('leave',authB()).catch(()=>{});S.pair=null;S.pstate='none';commit();toast('Code cancelled')},
   enablepush:()=>{enablePush()},
   testpush:async()=>{try{await ensureAccount();const j=await srv('test',authB());toast(j.hasSub?(j.ok?'Test sent. It should appear in a few seconds.':'The phone did not accept it. Turn notifications off and on again.'):'Turn on notifications first')}catch(e){toast("Couldn't reach the server")}},
@@ -1970,6 +1970,14 @@ Object.assign(A,{
 root.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='rq-t'){e.preventDefault();A.rqsave()}});
 
 Object.assign(INP,{obws:e=>{S.users.lara.workStart=e.value;S.users.lara.routine.work=e.value},obwe:e=>{S.users.lara.workEnd=e.value;S.users.lara.routine.workend=e.value}});
+
+/* demo partner: sample Partner Memory so the feature can be tried without a second phone */
+function pSeedDemo(){
+  pini();S.pmem=S.pmem.filter(f=>!String(f.id).startsWith('demo'));
+  const b=new Date(TODAY);b.setDate(b.getDate()+9);const bd='1995-'+String(b.getMonth()+1).padStart(2,'0')+'-'+String(b.getDate()).padStart(2,'0');
+  const items=[['birthday',bd],['cuisine','Italian'],['color','Blue'],['movie','Interstellar'],['place','Goa'],['hobby','Photography'],['flower','Roses'],['dream','Switzerland, Japan'],['love','Books\nPlants'],['notwant','Perfume'],['comfort','Pizza'],['drink','Oat latte'],['dislike','Coriander\nOlives'],['spice','Medium'],['happy','Unexpected calls\nSunday walks'],['k_space','I need an hour to myself after a long day. It is not about you.'],['anniversary','2022-03-14'],['family',"2000-01-20",'Mum’s birthday']];
+  items.forEach((x,i)=>S.pmem.push({id:'demo'+i,cat:PDEF[x[0]].cat,key:x[0],title:x[2]||'',type:PDEF[x[0]].type,value:x[1],note:'',upd:Date.now(),_rev:1,got:Date.now()}));
+}
 
 const api={sync,render,setViewer,getViewer:()=>viewer,ui,route:()=>route,S:()=>S};
 APPS.push(api);
