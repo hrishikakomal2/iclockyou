@@ -374,6 +374,19 @@ h2.sec{color:var(--you);letter-spacing:.12em}
 .badge{background:var(--you);color:#fff}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1B1726;--surface:#252036;--surface-2:#2E2842;--ink:#F3EFFA;--ink-2:#A9A1C2;--line:#352F4A;--you-soft:#4A2B2D;--them-soft:#312A4D;color-scheme:dark}
   .lhero{background:linear-gradient(135deg,#2E2745,#2A2340);border-color:#3A3256}.lhero h2,.ml{color:#F3EFFA}.mtile,.nav,.hpill{background:var(--surface)}}
+
+.legal{display:grid;gap:10px}
+.legal details{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:4px 16px}
+.legal summary{font:600 17px var(--f-display);padding:12px 0;cursor:pointer;list-style:none}
+.legal summary::-webkit-details-marker{display:none}
+.legal summary::after{content:'+';float:right;color:var(--you);font-weight:700}
+.legal details[open] summary::after{content:'\2212'}
+.legal p{margin:0 0 12px;font-size:13.5px;line-height:1.5;color:var(--ink-2)}
+.legal p b{color:var(--ink)}
+.agree{display:flex;align-items:flex-start;gap:12px;text-align:left;font-size:14px;line-height:1.4;padding:6px 2px}
+.agree .box{flex:none;width:24px;height:24px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;background:var(--surface);color:#fff}
+.agree[aria-checked="true"] .box{background:var(--you);border-color:var(--you)}
+.nbell{width:76px;height:76px;border-radius:50%;background:var(--you-soft);color:var(--you);display:grid;place-items:center}
 </style>
 </head>
 <body>
@@ -798,7 +811,6 @@ SCR.today=()=>{
     <div class="sec-h2"><div><div class="eyebrow k">The little things</div><h2 class="h2">Your day at a glance</h2></div><button class="link" data-a="go" data-v="routine">All routines ${ic('next',14)}</button></div>
     ${chip}
     ${dayCard()}
-    ${REAL&&!S.pushOn&&pushSupported()?`<button class="strip" data-a="enablepush"><span class="ico">${ic('bell')}</span><span style="flex:1"><div class="s1">Turn on notifications</div><div class="s2">Get alarms, reminders and updates even when the app is closed</div></span><span class="chev">${ic('next',18)}</span></button>`:REAL&&!S.pushOn&&isIOS()&&!isStandalone()?`<div class="hint" style="margin-top:10px">For notifications on iPhone: tap Share, then Add to Home Screen, and open the app from there.</div>`:''}
     ${ap?promptCard(ap):''}
     ${asks.map(r=>askCard(r)).join('')}
     <div class="sec-h"><h2 class="sec">Today's schedule</h2><button class="link" data-a="go" data-v="routine">Routine</button></div>
@@ -964,7 +976,7 @@ SCR.notifs=()=>{
 
 SCR.me=()=>{const u=U(),p=nm(PID());
   const modeTxt=S.mode==='single'?'Single':S.pstate==='connected'?`Mingle · ${nm(V())} & ${p}`:S.pstate==='invited'?`Mingle · waiting for ${p}`:'Mingle · no partner yet';
-  const rows=[['myday','sun','My day','Work days, hours, daily times'],['routine','routine','Routine & alarms','Times, check-ins, alarms'],['privacy','shield','Privacy',S.mode==='single'?'Everything here is only yours':'What is shared, asked or kept'],...(isConn()?[['sharing','eye','Sharing settings','What '+p+' sees of your schedule']]:[]),['notifset','bell','Notification settings','Updates, quiet hours'],['myprofile','user','My Profile',S.mode==='single'?'Things about you, only yours':'What you share about you'],...(isConn()?[['pmem','us','Partner Memory','What '+p+' shared with you']]:[]),['relmode','us','Relationship mode',modeTxt],['settings','sliders','Settings','Clock, appearance, account'],['proto','play','About this test build','What works, notifications, reset']];
+  const rows=[['myday','sun','My day','Work days, hours, daily times'],['routine','routine','Routine & alarms','Times, check-ins, alarms'],['privacy','shield','Privacy',S.mode==='single'?'Everything here is only yours':'What is shared, asked or kept'],...(isConn()?[['sharing','eye','Sharing settings','What '+p+' sees of your schedule']]:[]),['notifset','bell','Notification settings','Updates, quiet hours'],['myprofile','user','My Profile',S.mode==='single'?'Things about you, only yours':'What you share about you'],...(isConn()?[['pmem','us','Partner Memory','What '+p+' shared with you']]:[]),['relmode','us','Relationship mode',modeTxt],['settings','sliders','Settings','Clock, appearance, account'],['legal','shield','Terms and Privacy','How your data is used'],['proto','play','About this test build','What works, notifications, reset']];
   return `${route.length>1?bar('Me'):'<div class="head"><h1 class="title">Me</h1></div>'}
   <div style="display:flex;align-items:center;gap:16px;padding:8px 0 18px">${av(V(),68)}<div><h1 class="title" style="font-size:26px;margin:0">${esc(u.name)}</h1><div class="sub" style="margin:2px 0 0">${esc(u.emp)} · ${esc(u.workLoc)}</div><span class="chip" style="margin-top:8px">${S.mode==='single'?'Single · My Space':'Mingle · My Space + Our Space'}</span></div></div>
   ${isConn()?`<div class="card" style="display:flex;gap:12px;align-items:center;margin-bottom:14px"><span style="flex:1"><div style="font-weight:650">Quiet day</div><div class="s2" style="font-size:13px;color:var(--ink-2)">Pauses check-ins and sharing for today. ${esc(p)} isn't told.</div></span>${tog('quietDay',u.quietDay,'Quiet day')}</div>`:''}
@@ -1107,15 +1119,15 @@ SCR.proto=()=>{
   <button class="btn bad" data-a="sheet" data-v="reset">Reset all data</button>`};
 
 /* ---------- onboarding flow screens ---------- */
-const obOrder=()=>ui.onb.mode==='mingle'?['signup','mode','invite','spaces','details']:['signup','mode','details','spaces'];
-const stepList=()=>ui.onb.mode==='mingle'?[]:obOrder().slice(2,-1);
+const obOrder=()=>ui.onb.mode==='mingle'?['terms','signup','mode','invite','spaces','details','notify']:['terms','signup','mode','details','spaces','notify'];
+const stepList=()=>ui.onb.mode==='mingle'?[]:obOrder().slice(3,-2);
 const flowTop=(steps)=>{const cur=route[0].n,sl=stepList(),i=sl.indexOf(cur);return `<div style="display:flex;align-items:center;gap:8px;margin-left:-10px"><button class="ibtn" data-a="obback" aria-label="Back">${ic('back')}</button>${steps&&i>=0?`<div style="flex:1"><div class="steps" aria-label="Step ${i+1} of ${sl.length}">${sl.map((_,j)=>`<i class="${j<=i?'on':''}"></i>`).join('')}</div></div><button class="link" data-a="obskip">Skip</button>`:''}</div>`};
 const artSingle=`<svg width="92" height="92" viewBox="0 0 100 100" aria-hidden="true"><path d="M78 68A34 34 0 1 1 78 32" fill="none" stroke="var(--you)" stroke-width="7" stroke-linecap="round"/><path d="M48 50L48 27" stroke="var(--you)" stroke-width="8" stroke-linecap="round"/><circle cx="48" cy="50" r="5" fill="var(--you)"/></svg>`;
 const artMingle=`<svg width="120" height="92" viewBox="0 0 130 100" aria-hidden="true"><circle cx="46" cy="50" r="30" fill="none" stroke="var(--you)" stroke-width="7"/><circle cx="84" cy="50" r="30" fill="none" stroke="var(--them)" stroke-width="7"/><path d="M46 50L46 30" stroke="var(--you)" stroke-width="7" stroke-linecap="round"/><path d="M84 50L100 42" stroke="var(--them)" stroke-width="7" stroke-linecap="round"/></svg>`;
 SCR.splash=()=>{if(!ui.splashTimer){ui.splashTimer=setTimeout(()=>{if(route[route.length-1].n==='splash'){route=[{n:'welcome'}];render()}},1600)}
   return `<div class="splash" style="animation:fade .4s"><div style="color:#F2F5F6">${MARK(84)}</div><b>I Clock You</b><div class="tagline" style="color:#9FB2B9">Time, routine, together</div></div>`};
 SCR.welcome=()=>`<div class="flow"><div class="hero"><div>${MARK(52)}</div><h1>One clock for your day. Two, if you want.</h1><p class="lead">Notes, reminders, alarms and your schedule in My Space. Add a partner and you get Our Space too.</p></div>
-  <div style="display:grid;gap:8px"><button class="btn" data-a="obgo" data-v="signup">Get started</button><p style="font-size:12.5px;color:var(--ink-2);text-align:center;margin:4px 0 0">Test build. Your data stays on this phone.</p></div></div>`;
+  <div style="display:grid;gap:8px"><button class="btn" data-a="obgo" data-v="terms">Get started</button><p style="font-size:12.5px;color:var(--ink-2);text-align:center;margin:4px 0 0">Test build. Your data stays on this phone.</p></div></div>`;
 SCR.signup=()=>`<div class="flow">${flowTop()}<div><h1>Choose a username</h1><p class="lead">This is the name your partner sees. No password or email needed. Your data stays on this phone.</p></div>
   <div style="display:grid;gap:12px">
   <label class="field"><span>Username</span><input type="text" data-in="obname" value="${esc(ui.onb.name)}" placeholder="e.g. lara_j" maxlength="30" autocomplete="username" autocapitalize="none"></label>
@@ -1156,6 +1168,36 @@ SCR.spaces=()=>{const mg=ui.onb.mode==='mingle',inv=S.pstate==='invited',host=in
   ${mg?`<div class="sp them"><span class="spi">${inv?`<span class="av them ghost" style="--s:40px">${esc(PN()[0]||'P')}</span>`:`<span class="avp">${av('lara',40)}${av('sam',40)}</span>`}</span><span><b>Our Space</b><small>${inv?(S.pair&&S.pair.role==='host'?'Share your code. It starts when your partner joins.':S.pair?'Connecting with your partner.':'Waiting for '+esc(PN())+'.'):'Ours. Shared tasks, schedule and status, only what you both choose.'}</small></span></div>`:''}</div>
   <button class="btn" data-a="obfinish">${mg?'Continue':'Open My Space'}</button></div>`};
 
+
+/* ---------- terms, privacy, notifications pages ---------- */
+const LEGAL=`<div class="legal">
+<details open><summary>Terms of Use</summary>
+<p><b>What this is.</b> I Clock You is a shared routine and reminder app for you, and optionally one partner. This is a test build and is provided as it is, without promises that it will always work.</p>
+<p><b>Your content.</b> Your notes, reminders and routine are yours. You are responsible for what you add and share.</p>
+<p><b>Use with consent.</b> Only connect with someone who agrees to it. Do not use the app to watch, track or control another person. Either person can disconnect at any time.</p>
+<p><b>Alarms and reminders.</b> Do not rely on this app for anything where a missed alarm could cause harm, such as medicine or travel. Alarms and notifications can be delayed or blocked by your phone.</p>
+<p><b>Stopping.</b> You can stop using the app at any time by logging out in Settings. We may change or stop the app, and we will try to give notice first.</p>
+</details>
+<details><summary>Privacy Policy</summary>
+<p><b>What stays on your phone.</b> Your notes, reminders, alarms, routine and settings are stored on your phone.</p>
+<p><b>What is sent to our server.</b> Only what is needed for the features you turn on: your username, a code to link you with your partner, your notification settings and the moments or reminders you choose to share. Sharing is your choice for each item, and you can stop it with one tap.</p>
+<p><b>What we do not do.</b> We do not track your location, show ads or sell your data.</p>
+<p><b>Your partner.</b> Your partner only sees what you decide to share. They are never told what you keep private, or that you skipped or ignored something.</p>
+<p><b>Deleting your data.</b> Logging out in Settings clears this phone and leaves the shared space. Shared items already sent stay with your partner as copies.</p>
+<p><b>Sensitive details.</b> Shared updates pass through a server, so avoid putting very sensitive details in shared items.</p>
+<p><b>Questions.</b> Contact the I Clock You team through the place where you got this app.</p>
+</details></div>`;
+SCR.terms=()=>`<div class="flow">${flowTop()}<div><h1>Before we start</h1><p class="lead">A quick read. Your data stays yours, and your partner only sees what you choose to share.</p></div>
+  ${LEGAL}
+  <button class="agree" role="checkbox" aria-checked="${!!ui.onb.agree}" data-a="obagree"><span class="box">${ui.onb.agree?ic('check',16):''}</span><span>I have read and agree to the Terms of Use and Privacy Policy.</span></button>
+  <div style="flex:1"></div><button class="btn" data-a="obgo" data-v="signup" ${ui.onb.agree?'':'disabled style="opacity:.4"'}>Agree and continue</button></div>`;
+SCR.legal=()=>`${bar('Terms and Privacy')}<div style="margin-top:6px">${LEGAL}</div>`;
+SCR.notify=()=>{const ok=pushSupported(),ios=isIOS()&&!isStandalone(),mg=ui.onb.mode==='mingle'||S.mode==='mingle';
+  return `<div class="flow"><div style="flex:1;display:grid;align-content:center;gap:18px;justify-items:center;text-align:center"><span class="nbell">${ic('bell',34)}</span>
+  <div><h1>Never miss a moment</h1><p class="lead" style="margin-inline:auto">Turn on notifications so these reach you, even when the app is closed.</p></div>
+  <div class="list" style="width:100%;text-align:left">${[['alarm','Alarms and reminders','They ring and appear on time'],['sun','Daily check-ins','Gentle prompts for your routine'],...(mg?[['heart','Moments from your partner','Little updates when they send one']]:[])].map(([i,t,sub])=>`<div class="pr"><span class="rico" style="background:var(--you-soft);color:var(--you)">${ic(i)}</span><span class="sl"><div class="s1">${t}</div><div class="s2">${sub}</div></span></div>`).join('')}</div>
+  ${!ok?`<div class="hint">${ios?'On iPhone, tap Share, then Add to Home Screen, and open the app from there. Then you can turn notifications on in Settings.':'This browser cannot receive notifications. You can still use everything else.'}</div>`:''}</div>
+  <div style="display:grid;gap:8px">${ok?`<button class="btn" data-a="obnotify">Turn on notifications</button>`:''}<button class="${ok?'linkbtn':'btn'}" data-a="obnotskip">${ok?'Not now':'Continue'}</button></div></div>`};
 SCR.details=()=>{const u=S.users.lara,o=ui.onb;
   return `<div class="flow">${flowTop(1)}<div><h1>Your details</h1><p class="lead">So check-ins arrive at the right time. You can change all of this later.</p></div>
   <div class="field"><span>Work days</span><div class="dchips">${[1,2,3,4,5,6,0].map(d=>`<button data-a="obday" data-v="${d}" aria-pressed="${o.days.includes(d)}" aria-label="${WDL[d]}">${WD[d][0]}</button>`).join('')}</div></div>
@@ -1281,7 +1323,7 @@ function render(){
   const key=r.n+(r.id||'')+(r.k||'');const prevTop=sc&&root.dataset.key===key?sc.scrollTop:0;
   propagate();
   const focusId=root.contains(document.activeElement)&&document.activeElement.id;
-  const flowRoutes=['splash','welcome','signup','login','mode','profile','employment','workhours','routineSetup','invite','spaces','invited','connected','sharePresets'];
+  const flowRoutes=['splash','welcome','signup','login','mode','profile','employment','workhours','routineSetup','invite','spaces','invited','connected','sharePresets','terms','notify'];
   const flow=flowRoutes.includes(r.n);
   const html=(SCR[r.n]||SCR.today)(r);
   const t=tabOf(),pend=isConn()?S.rems.filter(x=>x.for===V()&&x.by!==V()&&x.status==='sent').length:0;
@@ -1769,8 +1811,16 @@ Object.assign(A,{
 A.logoutgo=()=>{if(S.pair&&S.acct){srv('leave',authB()).catch(()=>{})}try{localStorage.removeItem('iclockyou-test-v1')}catch(x){}S=REAL?realSeed():seed();lastJson=null;S.onboarded=false;route=[{n:'welcome'}];ui.sheet=null;ui.banner=null;ui.onb.mode=null;ui.onb.step=0;ui.onb.name='';commit();toast('Logged out')};
 const _sepgo=A.sepgo;A.sepgo=()=>{if(S.pair&&S.acct){srv('leave',authB()).catch(()=>{});S.pair=null}_sepgo()};
 const _obfinish=A.obfinish;
-A.obfinish=()=>{if(!S.onboarded&&ui.onb.mode==='mingle'&&!ui.onb.dd){route=[{n:'details'}];render();return}_obfinish()};
-A.obdone=()=>{ui.onb.dd=true;_obfinish()};
+A.obfinish=()=>{
+  if(!S.onboarded){
+    if(ui.onb.mode==='mingle'&&!ui.onb.dd){route=[{n:'details'}];render();return}
+    if(!ui.onb.nd){route=[{n:'notify'}];render();return}
+  }
+  _obfinish()};
+A.obdone=()=>{ui.onb.dd=true;A.obfinish()};
+A.obagree=()=>{ui.onb.agree=!ui.onb.agree;render()};
+A.obnotskip=()=>{ui.onb.nd=true;_obfinish()};
+A.obnotify=async()=>{ui.onb.nd=true;try{await enablePush()}catch(e){}_obfinish()};
 Object.assign(INP,{codein:e=>{const v=e.value.toUpperCase();if(ui.sheet&&ui.sheet.t==='invite')ui.sheet.codeIn=v;else ui.onb.codeIn=v}});
 if(REAL){
   setInterval(()=>{if(!document.hidden&&S.pair)pollOnce()},4000);
