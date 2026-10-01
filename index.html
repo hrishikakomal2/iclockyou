@@ -1122,10 +1122,10 @@ SCR.signup=()=>`<div class="flow">${flowTop()}<div><h1>Choose a username</h1><p 
   <button class="btn" data-a="obnext">Continue</button></div></div>`;
 SCR.login=()=>SCR.signup();
 const MN=()=>S.users.lara.name||'You',PN=()=>S.users.sam.name||'Partner';
-const modeCards=(sel,partnerName)=>`<div class="modes" role="radiogroup" aria-label="How are you using I Clock You?">
+const modeCards=(sel,partnerName)=>`<div class="modes" role="radiogroup" aria-label="Who is this day for?">
   <button class="modecard ${sel==='mingle'?'on':''}" role="radio" aria-checked="${sel==='mingle'}" data-a="modepick" data-v="mingle"><span class="mart mm">${artMingle}</span><span class="mtx"><b>Mingle</b><span>For couples who want to share their routines, schedules, reminders and daily life.</span><span class="mtags"><i>My Space</i><i class="t">+ Our Space</i></span></span><span class="radio"></span></button>
   <button class="modecard ${sel==='single'?'on':''}" role="radio" aria-checked="${sel==='single'}" data-a="modepick" data-v="single"><span class="mart ms">${artSingle}</span><span class="mtx"><b>Single</b><span>For managing your own notes, reminders, alarms, schedule and personal routines.</span><span class="mtags"><i>My Space</i></span></span><span class="radio"></span></button></div>`;
-SCR.mode=()=>`<div class="flow">${flowTop()}<div><h1>How are you using I Clock You?</h1><p class="lead">Both get the full app. Mingle adds a shared space for the two of you.</p></div>
+SCR.mode=()=>`<div class="flow">${flowTop()}<div><h1>Who is this day for?</h1><p class="lead">Every feature is yours either way. Choose Mingle to also share little moments with your partner.</p></div>
   ${modeCards(ui.onb.mode)}
   <p style="font-size:13px;color:var(--ink-2);margin:0;text-align:center">You can change this any time in Settings.</p>
   <div style="flex:1"></div><button class="btn" data-a="obnext" ${ui.onb.mode?'':'disabled style="opacity:.4"'}>Continue</button></div>`;
