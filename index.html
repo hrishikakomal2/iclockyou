@@ -1798,7 +1798,7 @@ Object.assign(A,{
       say('');const wasOn=S.onboarded;if(!wasOn){applyOnb();ui.onb.mode='mingle'}
       S.mode='mingle';S.pstate='connected';S.pair={code,role:'guest'};S.pinfo={method:'code',contact:''};S.users.sam.name=(j.name||'').trim()||'Partner';ui.sheet=null;
       afterHello(true);
-    }catch(e){say((e&&e.message)||"Couldn't connect. Check your internet.")}
+    }catch(e){say(/own code/i.test((e&&e.message)||'')?'This is the code you created. Send it to your partner and ask them to enter it on their own phone. To try the app alone, tap “Try a demo partner”.':((e&&e.message)||"Couldn't connect. Check your internet."))}
   },
   linkretry:()=>{pollOnce();toast('Checking…')},
   copycode:()=>{const t=fmtCode(S.pair&&S.pair.code);try{navigator.clipboard.writeText(t).then(()=>toast('Code copied'),()=>toast('Code: '+t))}catch(e){toast('Code: '+t)}},
