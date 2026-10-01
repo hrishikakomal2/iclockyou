@@ -1744,7 +1744,7 @@ async function enablePush(){
   if(!pushSupported()){toast(isIOS()&&!isStandalone()?'On iPhone, add this app to your Home Screen first, then open it from there.':'This browser cannot receive notifications.');return}
   try{
     const perm=await Notification.requestPermission();
-    if(perm!=='granted'){toast('Notifications are blocked. Allow them in your phone settings.');return}
+    if(perm!=='granted'){toast('Notifications are blocked here. Private or Incognito windows cannot use them. Allow them in your browser or phone settings, then try again.');return}
     await ensureAccount();
     const reg=await navigator.serviceWorker.ready;
     let sub=await reg.pushManager.getSubscription();
