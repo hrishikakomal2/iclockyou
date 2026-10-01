@@ -1339,6 +1339,7 @@ function render(){
    ${ours?`<button data-a="tab" data-v="us" ${t==='us'?'aria-current="page"':''}><span class="pl">${ic('heart',21)}${pend?`<span class="badge" aria-label="${pend} new">${pend}</span>`:''}</span>Our space</button>`:`<button data-a="tab" data-v="me" ${t==='me'?'aria-current="page"':''}><span class="pl">${ic('heart',21)}</span>Me</button>`}</nav>`;
   let layer='';
   if(ui.sheet)layer+=SH[ui.sheet.t]();
+  if(flow||!S.onboarded){ui.banner=null;ui.ring=null}
   if(ui.banner&&!ui.ring)layer+=bannerHTML(ui.banner);
   if(ui.toast)layer+=`<div class="toast" role="status"><span>${esc(ui.toast)}</span>${undoFn?'<button data-a="undo">Undo</button>':''}</div>`;
   if(ui.ring){const a=S.alarms.find(x=>x.id===ui.ring)||{label:'Wake up',time:'06:55'};const [tt,ap]=fmtHM(a.time).split(' ');
