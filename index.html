@@ -1107,8 +1107,8 @@ SCR.proto=()=>{
   <button class="btn bad" data-a="sheet" data-v="reset">Reset all data</button>`};
 
 /* ---------- onboarding flow screens ---------- */
-const obOrder=()=>['signup','mode','details',...(ui.onb.mode==='mingle'?['invite']:[]),'spaces'];
-const stepList=()=>obOrder().slice(2,-1);
+const obOrder=()=>ui.onb.mode==='mingle'?['signup','mode','invite','spaces','details']:['signup','mode','details','spaces'];
+const stepList=()=>ui.onb.mode==='mingle'?[]:obOrder().slice(2,-1);
 const flowTop=(steps)=>{const cur=route[0].n,sl=stepList(),i=sl.indexOf(cur);return `<div style="display:flex;align-items:center;gap:8px;margin-left:-10px"><button class="ibtn" data-a="obback" aria-label="Back">${ic('back')}</button>${steps&&i>=0?`<div style="flex:1"><div class="steps" aria-label="Step ${i+1} of ${sl.length}">${sl.map((_,j)=>`<i class="${j<=i?'on':''}"></i>`).join('')}</div></div><button class="link" data-a="obskip">Skip</button>`:''}</div>`};
 const artSingle=`<svg width="92" height="92" viewBox="0 0 100 100" aria-hidden="true"><path d="M78 68A34 34 0 1 1 78 32" fill="none" stroke="var(--you)" stroke-width="7" stroke-linecap="round"/><path d="M48 50L48 27" stroke="var(--you)" stroke-width="8" stroke-linecap="round"/><circle cx="48" cy="50" r="5" fill="var(--you)"/></svg>`;
 const artMingle=`<svg width="120" height="92" viewBox="0 0 130 100" aria-hidden="true"><circle cx="46" cy="50" r="30" fill="none" stroke="var(--you)" stroke-width="7"/><circle cx="84" cy="50" r="30" fill="none" stroke="var(--them)" stroke-width="7"/><path d="M46 50L46 30" stroke="var(--you)" stroke-width="7" stroke-linecap="round"/><path d="M84 50L100 42" stroke="var(--them)" stroke-width="7" stroke-linecap="round"/></svg>`;
@@ -1154,7 +1154,7 @@ SCR.spaces=()=>{const mg=ui.onb.mode==='mingle',inv=S.pstate==='invited',host=in
   ${host?`<div class="card" style="display:grid;gap:12px;justify-items:center;text-align:center;padding:20px 16px"><div class="tagline">Your code</div><div class="codebig" aria-label="Code">${fmtCode(S.pair.code)}</div><div class="btns" style="width:100%"><button class="btn sec" data-a="copycode">Copy code</button><button class="btn them" data-a="sharecode">Share</button></div><div class="chip" role="status">${linkState==='idle'?'Waiting for your partner…':linkLabel()}</div></div>`:''}
   <div class="sp you"><span class="spi"><span class="avp">${av('lara',40)}</span></span><span><b>My Space</b><small>Mine. Notes, reminders, alarms, schedule, routine. Private by default.</small></span></div>
   ${mg?`<div class="sp them"><span class="spi">${inv?`<span class="av them ghost" style="--s:40px">${esc(PN()[0]||'P')}</span>`:`<span class="avp">${av('lara',40)}${av('sam',40)}</span>`}</span><span><b>Our Space</b><small>${inv?(S.pair&&S.pair.role==='host'?'Share your code. It starts when your partner joins.':S.pair?'Connecting with your partner.':'Waiting for '+esc(PN())+'.'):'Ours. Shared tasks, schedule and status, only what you both choose.'}</small></span></div>`:''}</div>
-  <button class="btn" data-a="obfinish">Open My Space</button></div>`};
+  <button class="btn" data-a="obfinish">${mg?'Continue':'Open My Space'}</button></div>`};
 
 SCR.details=()=>{const u=S.users.lara,o=ui.onb;
   return `<div class="flow">${flowTop(1)}<div><h1>Your details</h1><p class="lead">So check-ins arrive at the right time. You can change all of this later.</p></div>
@@ -1163,7 +1163,7 @@ SCR.details=()=>{const u=S.users.lara,o=ui.onb;
   <div class="field"><span>Where do you work?</span><div class="chipsel">${['Office','Work from home','Hybrid'].map(a=>`<button data-a="obloc" data-v="${a}" aria-pressed="${o.loc===a}">${a}</button>`).join('')}</div></div>
   <div class="field"><span>Daily times</span></div>
   <div class="card">${['wake','breakfast','lunch','dinner','sleep'].map(k=>`<div class="tline"><label>${KEMOJI[k]} ${KLABEL[k]}</label><input type="time" data-in="rtime" data-k="${k}" data-u="lara" value="${u.routine[k]}"></div>`).join('')}</div>
-  <div style="flex:1"></div><button class="btn" data-a="obnext">Continue</button></div>`};
+  <div style="flex:1"></div><button class="btn" data-a="${o.mode==='mingle'?'obdone':'obnext'}">${o.mode==='mingle'?'Finish':'Continue'}</button></div>`};
 SCR.invited=()=>SCR.connected();
 SCR.connected=()=>`<div class="flow" style="justify-content:center"><div class="phone2"><div style="display:flex;align-items:center"><span class="you">${av('lara',64)}</span><span class="them" style="margin-left:-12px">${av('sam',64)}</span></div><h1 style="text-align:center">${esc(PN())} joined</h1><p class="lead" style="max-width:34ch;text-align:center">${S.pair?'You are connected.':'Test build: '+esc(PN())+' is simulated on this phone.'} Three spaces now exist, and nobody sees anyone's private content.</p></div>
   <div style="display:grid;gap:10px"><div class="sp you"><span class="spi">${av('lara',36)}</span><span><b>${esc(MN())}'s My Space</b><small>Private to ${esc(MN())}</small></span></div><div class="sp them"><span class="spi">${av('sam',36)}</span><span><b>${esc(PN())}'s My Space</b><small>Private to ${esc(PN())}</small></span></div><div class="sp us"><span class="spi"><span class="avp">${av('lara',36)}${av('sam',36)}</span></span><span><b>${esc(MN())} &amp; ${esc(PN())}'s Our Space</b><small>Only what you both put here</small></span></div></div>
@@ -1768,6 +1768,9 @@ Object.assign(A,{
 });
 A.logoutgo=()=>{if(S.pair&&S.acct){srv('leave',authB()).catch(()=>{})}try{localStorage.removeItem('iclockyou-test-v1')}catch(x){}S=REAL?realSeed():seed();lastJson=null;S.onboarded=false;route=[{n:'welcome'}];ui.sheet=null;ui.banner=null;ui.onb.mode=null;ui.onb.step=0;ui.onb.name='';commit();toast('Logged out')};
 const _sepgo=A.sepgo;A.sepgo=()=>{if(S.pair&&S.acct){srv('leave',authB()).catch(()=>{});S.pair=null}_sepgo()};
+const _obfinish=A.obfinish;
+A.obfinish=()=>{if(!S.onboarded&&ui.onb.mode==='mingle'&&!ui.onb.dd){route=[{n:'details'}];render();return}_obfinish()};
+A.obdone=()=>{ui.onb.dd=true;_obfinish()};
 Object.assign(INP,{codein:e=>{const v=e.value.toUpperCase();if(ui.sheet&&ui.sheet.t==='invite')ui.sheet.codeIn=v;else ui.onb.codeIn=v}});
 if(REAL){
   setInterval(()=>{if(!document.hidden&&S.pair)pollOnce()},4000);
