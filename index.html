@@ -654,6 +654,10 @@ function deliver(u,kind,o){
   if(u===V()&&(kind==='wake'||kind==='sleep')&&auto()){setTimeout(()=>{if(viewer!==u)return;const rt=kind==='wake'?'Good morning ❤️':'Good night ❤️';S.feed.unshift({id:uid('f'),to:u,from:p,kind:'reply',text:`${nm(p)} says ${rt}`,ts:NOW(),read:false,push:true});ui.banner={t:'reply',text:`${nm(p)} says ${rt}`};commit()},2800)}
 }
 const inQuiet=id=>{const q=U(id).quiet;if(!q.on)return false;const n=S.clock,a=hm2m(q.from),b=hm2m(q.to);return a>b?(n>=a||n<b):(n>=a&&n<b)};
+const REPLY_SETS=[[/good morning/i,['Good morning ❤️','Have a lovely day','Love you']],[/miss you/i,['Miss you too ❤️',"Can't wait to see you",'Call me?']],[/working/i,['Good luck today','Have a great day','Talk later']],[/i.?m home|home/i,['Welcome home ❤️','See you soon','Missed you']],[/call me/i,['Calling you now','Give me 10 minutes',"Can't right now"]],[/running late/i,['No worries','Drive safe','Thanks for telling me']],[/on my way/i,['See you soon','Drive safe','Okay 👍']],[/thinking of you/i,['Thinking of you too ❤️','Miss you','Love you']]];
+const replySet=text=>{for(const [re,r] of REPLY_SETS)if(re.test(text||''))return r;return ['Okay 👍','Love you ❤️','Talk later']};
+const repliesFor=f=>{if(!f||f.from===V())return [];if(f.replies&&f.replies.length)return f.replies;if((f.kind==='reply'&&!/ says /.test(f.text||''))||f.kind==='status')return replySet(f.text);return []};
+function replyLatest(text){const f=S.feed.find(x=>x.to===V()&&x.from!==V()&&!x.replied&&repliesFor(x).length);if(f)sendReply(f.id,text);else sendQuick(text)}
 function sendReply(fid,text){
   const f=S.feed.find(x=>x.id===fid);if(!f)return;f.replied=text;f.read=true;
   S.feed.unshift({id:uid('f'),to:f.from,from:V(),kind:'reply',text:`${nm(V())} says ${text}`,ts:NOW(),read:false,push:true});
@@ -968,7 +972,7 @@ SCR.notifs=()=>{
   const icon=f=>f.kind==='reminder'?'send':f.kind==='done'?'check':f.kind==='event'?'cal':'user';
   return `${bar('Notifications',`<button class="link" data-a="readall" style="margin-right:6px">Mark all read</button>`)}
    ${ns.length?`<div class="list">${ns.map(f=>`<div class="pr" style="align-items:flex-start"><span class="${tn(f.from)}">${av(f.from,40)}</span><span class="sl"><div class="s1" style="font-weight:${f.read?500:650}">${esc(f.text)}</div><div class="s2">${fmtT(f.ts)}${f.replied?` · you replied “${esc(f.replied)}”`:''}</div>
-     ${f.kind==='status'&&!f.replied&&f.replies?`<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">${f.replies.map(t=>`<button class="chip c them" style="min-height:36px;padding:0 12px;font-size:13.5px" data-a="reply" data-id="${f.id}" data-v="${esc(t)}">${esc(t)}</button>`).join('')}</div>`:''}
+     ${!f.replied&&repliesFor(f).length?`<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">${repliesFor(f).map(t=>`<button class="chip c them" style="min-height:36px;padding:0 12px;font-size:13.5px" data-a="reply" data-id="${f.id}" data-v="${esc(t)}">${esc(t)}</button>`).join('')}</div>`:''}
      ${f.kind==='reminder'?`<button class="link" data-a="openrem" data-id="${f.ref}" data-k="${dk(REM(f.ref)?.at||TODAY)}">Open</button>`:''}</span>${f.read?'':'<span class="chip c them" style="margin-top:4px">New</span>'}</div>`).join('')}</div>`
    :empty('bell','You’re all caught up',isConn()?'Updates from '+esc(nm(PID()))+' show up here. Nothing you skip is ever reported.':'Reminders and alarms that need you show up here.')}
    ${isConn()?'<p class="hint" style="margin-top:14px">At most 6 status updates a day reach you as alerts. The rest wait quietly in Our Space.</p>':''}`;
@@ -1354,7 +1358,7 @@ function render(){
 function bannerHTML(b){
   let tone='them',icon='🔔',title='',sub='',btns='';
   if(b.t==='prompt'){const def=CI[b.kind],u=U();tone='you';icon=KEMOJI[b.kind];title=plain(def.title(u.name));sub=def.body;btns=def.opts.map(o=>`<button class="${o.p?'p':''}" data-a="ans" data-kind="${b.kind}" data-v="${o.k}">${o.label}</button>`).join('')}
-  else if(b.t==='feed'){const f=S.feed.find(x=>x.id===b.id);if(!f)return'';icon=f.kind==='done'?'✓':f.kind==='event'?'📅':KEMOJI[f.ck]||'💬';title=f.text;sub=`${nm(f.from)} · now`;btns=(f.replies||[]).map((t,i)=>`<button class="${i===0?'p':''}" data-a="reply" data-id="${f.id}" data-v="${esc(t)}">${esc(t)}</button>`).join('')+`<button data-a="bclose">Dismiss</button>`}
+  else if(b.t==='feed'){const f=S.feed.find(x=>x.id===b.id);if(!f)return'';icon=f.kind==='done'?'✓':f.kind==='event'?'📅':KEMOJI[f.ck]||'💬';title=f.text;sub=`${nm(f.from)} · now`;btns=repliesFor(f).map((t,i)=>`<button class="${i===0?'p':''}" data-a="reply" data-id="${f.id}" data-v="${esc(t)}">${esc(t)}</button>`).join('')+`<button data-a="bclose">Dismiss</button>`}
   else if(b.t==='reply'){icon='💬';title=b.text;sub='Just now';btns='<button data-a="bclose">Dismiss</button>'}
   else if(b.t==='rem'){const r=REM(b.id);if(!r)return'';const inc=r.by!==r.for;tone=inc?'them':'you';icon='🔔';title=inc?`${nm(r.by)} reminded you: ${r.title}`:`Reminder: ${r.title}`;sub=whenTxt(r.at);btns=`<button class="p" data-a="bdone" data-id="${r.id}" data-k="${b.k}">Done</button><button data-a="bsnz" data-id="${r.id}" data-k="${b.k}">Snooze 10 min</button>`}
   return `<div class="banner ${tone}" role="alert"><div class="bh"><span class="bi">${icon}</span><div style="flex:1;min-width:0"><div class="bt">${esc(title)}</div><div class="bs">${esc(sub)}</div></div><button class="ibtn" style="width:36px;height:36px" data-a="bclose" aria-label="Dismiss">${ic('x',18)}</button></div><div class="bb">${btns}</div></div>`;
@@ -2064,7 +2068,8 @@ Object.assign(A,{
 
 /* ---------- routine notifications: answer straight from the notification ---------- */
 function pAnswerFromNotif(kind,opt){const def=CI[kind];if(!def||!def.opts.some(o=>o.k===opt))return;const c=ckOf(V(),kind);if(isFinal(c))return;answer(V(),kind,opt);commit()}
-try{navigator.serviceWorker&&navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.t==='answer')pAnswerFromNotif(e.data.kind,e.data.opt)})}catch(e){}
+try{navigator.serviceWorker&&navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.t==='answer')pAnswerFromNotif(e.data.kind,e.data.opt);else if(e.data&&e.data.t==='reply'&&e.data.text)replyLatest(String(e.data.text).slice(0,80))})}catch(e){}
+try{const m=/[?&]rp=([^&]+)/.exec(location.search);if(m&&S.onboarded){const t=decodeURIComponent(m[1]).slice(0,80);history.replaceState(null,'',location.pathname);setTimeout(()=>replyLatest(t),600)}}catch(e){}
 try{const m=/[?&]ans=([a-z]+):([a-z]+)/.exec(location.search);if(m&&S.onboarded){pAnswerFromNotif(m[1],m[2]);history.replaceState(null,'',location.pathname)}}catch(e){}
 
 /* ---------- My day: one quick screen instead of a long setup ---------- */
