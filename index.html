@@ -1820,7 +1820,7 @@ A.obfinish=()=>{
 A.obdone=()=>{ui.onb.dd=true;A.obfinish()};
 A.obagree=()=>{ui.onb.agree=!ui.onb.agree;render()};
 A.obnotskip=()=>{ui.onb.nd=true;_obfinish()};
-A.obnotify=async()=>{ui.onb.nd=true;try{await enablePush()}catch(e){}_obfinish()};
+A.obnotify=()=>{ui.onb.nd=true;_obfinish();try{enablePush()}catch(e){}};
 Object.assign(INP,{codein:e=>{const v=e.value.toUpperCase();if(ui.sheet&&ui.sheet.t==='invite')ui.sheet.codeIn=v;else ui.onb.codeIn=v}});
 if(REAL){
   setInterval(()=>{if(!document.hidden&&S.pair)pollOnce()},4000);
